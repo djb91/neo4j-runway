@@ -10,6 +10,14 @@ import yaml
 
 from ..models import DataModel
 from .cypher import *
+from ..models import DataModel
+
+
+model_maps = []
+nodes_map = {}
+create_constraints = {}
+
+missing_properties_err = []
 
 
 class folded_unicode(str):

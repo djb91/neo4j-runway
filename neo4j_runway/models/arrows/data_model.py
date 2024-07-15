@@ -9,6 +9,9 @@ from pydantic import BaseModel
 from .node import ArrowsNode
 from .relationship import ArrowsRelationship
 
+from .node import ArrowsNode
+from .relationship import ArrowsRelationship
+
 DEFAULT_STYLE = {
     "font-family": "Nunito Sans",
     "background-color": "#F2F2F2",

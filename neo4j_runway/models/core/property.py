@@ -1,47 +1,47 @@
-from typing import Dict, Optional
+from typing import Dict, Union
 
 from pydantic import BaseModel, field_validator
 
-from ...resources.mappings import (
-    TYPES_MAP_NEO4J_TO_PYTHON,
-    TYPES_MAP_PYTHON_TO_NEO4J,
-    TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH,
-    TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
-)
-from ..solutions_workbench import SolutionsWorkbenchProperty
+
+TYPES_MAP_NEO4J_KEYS = {
+    "LIST": "list",
+    "MAP": "dict",
+    "BOOLEAN": "bool",
+    "INTEGER": "int",
+    "FLOAT": "float",
+    "STRING": "str",
+    "ByteArray": "bytearray",
+    "DATE": "neo4j.time.Date",
+    "ZONED TIME": "neo4j.time.Time",
+    "LOCAL TIME": "neo4j.time.Time",
+    "ZONED DATETIME": "neo4j.time.DateTime",
+    "LOCAL DATETIME": "neo4j.time.DateTime",
+    "DURATION": "neo4j.time.Duration",
+    "POINT": "neo4j.spatial.Point",
+    "POINT Cartesian": "neo4j.spatial.CartesianPoint",
+    "POINT WGS-84": "neo4j.spatial.WGS84Point",
+    "unknown": "unknown",
+}
+
+TYPES_MAP_PYTHON_KEYS = {v: k for k, v in TYPES_MAP_NEO4J_KEYS.items()}
 
 
 class Property(BaseModel):
     """
     Property representation.
-
-    Attributes
-    ----------
-    name : str
-        The property name in Neo4j.
-    type : str
-        The Python type of the property.
-    csv_mapping : str
-        Which csv column the property is found under.
-    csv_mapping_other : Optional[str]
-        An optional second csv column that also indicates this property.
-    is_unique : bool
-        Whether the property is a unique identifier.
-    part_of_key : bool
-        Whether the property is part of a node or relationship key.
     """
 
     name: str
     type: str
     csv_mapping: str
-    csv_mapping_other: Optional[str] = None
+    csv_mapping_other: Union[str, None] = None
     is_unique: bool = False
     part_of_key: bool = False
     # is_indexed: bool
     # must_exist: bool
 
     @field_validator("type")
-    def validate_type(cls, v: str) -> str:
+    def validate_type(cls, v: str):
         if v.lower() == "object" or v.lower() == "string":
             return "str"
         elif "float" in v.lower():
@@ -51,23 +51,20 @@ class Property(BaseModel):
         elif "bool" in v.lower():
             return "bool"
 
-        if v in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.keys()):
-            return TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON[v]
-        elif v in list(TYPES_MAP_NEO4J_TO_PYTHON.keys()):
-            return TYPES_MAP_NEO4J_TO_PYTHON[v]
-        elif v in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.values()):
-            return v
-        elif v in list(TYPES_MAP_NEO4J_TO_PYTHON.values()):
-            return v
-        else:
-            raise ValueError(f"Invalid Property type given: {v}")
+        if v not in list(TYPES_MAP_PYTHON_KEYS.keys()) and v not in list(
+            TYPES_MAP_PYTHON_KEYS.values()
+        ):
+            raise ValueError(f"{v} is an invalid type.")
+        if v in list(TYPES_MAP_PYTHON_KEYS.values()):
+            return TYPES_MAP_NEO4J_KEYS[v]
+        return v
 
     @property
     def neo4j_type(self) -> str:
         """
         The Neo4j property type.
         """
-        return TYPES_MAP_PYTHON_TO_NEO4J[self.type]
+        return TYPES_MAP_PYTHON_KEYS[self.type]
 
     @classmethod
     def from_arrows(
@@ -78,7 +75,6 @@ class Property(BaseModel):
         Arrow property values are formatted as <csv_mapping> | <python_type> | <unique, nodekey> | <ignore>.
         """
 
-        csv_mapping: str = ""
         if "|" in list(arrows_property.values())[0]:
             prop_props = [
                 x.strip() for x in list(arrows_property.values())[0].split("|")
@@ -88,14 +84,14 @@ class Property(BaseModel):
                     x.strip() for x in prop_props[0].split(",")
                 ]
             else:
-                csv_mapping = prop_props[0]
+                csv_mapping: str = prop_props[0]
                 csv_mapping_other = None
 
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
             node_key = "nodekey" in prop_props
         else:
-            csv_mapping = list(arrows_property.values())[0]
+            csv_mapping: str = list(arrows_property.values())[0]
             python_type = "unknown"
             csv_mapping_other = None
             is_unique = False
@@ -108,54 +104,4 @@ class Property(BaseModel):
             type=python_type,
             is_unique=is_unique,
             part_of_key=node_key,
-        )
-
-    @classmethod
-    def from_solutions_workbench(
-        cls, solutions_workbench_property: SolutionsWorkbenchProperty
-    ) -> "Property":
-        """
-        Parse the Solutions Workbench property into the standard property representation.
-        """
-
-        if "," in solutions_workbench_property.referenceData:
-            csv_mapping, csv_mapping_other = [
-                x.strip() for x in solutions_workbench_property.referenceData.split(",")
-            ]
-        else:
-            csv_mapping, csv_mapping_other = (
-                solutions_workbench_property.referenceData,
-                None,
-            )
-
-        return cls(
-            name=solutions_workbench_property.name,
-            csv_mapping=csv_mapping,
-            csv_mapping_other=csv_mapping_other,
-            type=TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON[
-                solutions_workbench_property.datatype
-            ],
-            is_unique=solutions_workbench_property.hasUniqueConstraint,
-            part_of_key=solutions_workbench_property.isPartOfKey,
-        )
-
-    def to_solutions_workbench(self) -> "SolutionsWorkbenchProperty":
-        """
-        Parse into a Solutions Workbench property representation.
-        """
-        if self.csv_mapping_other:
-            reference_data = f"{self.csv_mapping}, {self.csv_mapping_other}"
-        else:
-            reference_data = self.csv_mapping
-
-        return SolutionsWorkbenchProperty(
-            key=self.name,
-            name=self.name,
-            datatype=TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH[self.type],
-            referenceData=reference_data,
-            isPartOfKey=self.part_of_key,
-            isIndexed=self.is_unique,
-            mustExist=self.part_of_key,
-            hasUniqueConstraint=self.is_unique,
-            isArray=True if self.type.startswith("List") else False,
         )

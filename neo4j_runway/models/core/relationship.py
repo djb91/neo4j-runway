@@ -2,11 +2,8 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, field_validator
 
-from ..arrows import ArrowsRelationship
-from ..solutions_workbench import (
-    SolutionsWorkbenchRelationship,
-)
 from .property import Property
+from ..arrows import ArrowsRelationship
 
 
 class Relationship(BaseModel):

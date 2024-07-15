@@ -6,7 +6,6 @@ from typing import Dict
 
 from pydantic import BaseModel
 
-
 class ArrowsRelationship(BaseModel):
     """
     Relationship representation in arrows.app.

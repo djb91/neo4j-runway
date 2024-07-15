@@ -1,7 +1,6 @@
 import unittest
 
-from neo4j_runway.models.core.property import Property
-from neo4j_runway.resources.mappings import TYPES_MAP_PYTHON_TO_NEO4J
+from neo4j_runway.models.core.property import Property, TYPES_MAP_PYTHON_KEYS
 
 
 class TestProperty(unittest.TestCase):

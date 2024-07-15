@@ -4,8 +4,27 @@ This file contains the functions to create MATCH, MERGE and SET queries.
 
 from typing import List, Optional
 
-from ...exceptions import LoadCSVCypherGenerationError
-from ...models import Node, Property, Relationship
+from ..models import Property, Node, Relationship
+
+
+def generate_constraints_key(
+    label_or_type: str, unique_property: Union[Property, List[Property]]
+) -> str:
+    """
+    Generate the key for a unique or node key constraint.
+    """
+    if isinstance(unique_property, Property):
+        return f"{label_or_type.lower()}_{unique_property.name.lower()}"
+    else:
+        return f"{label_or_type.lower()}_{'_'.join([x.name.lower() for x in unique_property])}"
+
+
+def generate_constraint(label_or_type: str, unique_property: Property) -> str:
+    """
+    Generate a constrant string.
+    """
+
+    return f"CREATE CONSTRAINT {label_or_type.lower()}_{unique_property.name.lower()} IF NOT EXISTS FOR (n:{label_or_type}) REQUIRE n.{unique_property.name} IS UNIQUE;\n"
 
 
 def generate_match_node_clause(node: Node) -> str:

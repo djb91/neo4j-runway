@@ -1,7 +1,6 @@
 import unittest
 
-from neo4j_runway.models import Node, Property
-from neo4j_runway.models.arrows import ArrowsNode
+from neo4j_runway.models import Node, Property, ArrowsNode
 
 
 class TestNode(unittest.TestCase):

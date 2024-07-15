@@ -12,9 +12,8 @@ from IPython.display import (
     display,
 )
 
-from ..inputs import UserInput, user_input_safe_construct
-from ..llm.base import BaseDiscoveryLLM
-from ..resources.prompts.discovery import create_discovery_prompt
+from ..llm.llm import LLM
+from ..inputs.user_input import UserInput
 
 
 class Discovery:

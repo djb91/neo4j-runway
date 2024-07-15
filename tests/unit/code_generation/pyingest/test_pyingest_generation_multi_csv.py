@@ -1,8 +1,9 @@
 import unittest
 
-from neo4j_runway.code_generation import PyIngestConfigGenerator
-from neo4j_runway.models import DataModel, Node, Property, Relationship
-from tests.resources.answers.ingestion_generation_answers import *
+from neo4j_runway.models import Node, Relationship, Property, DataModel
+from neo4j_runway.ingestion.generate_ingest import *
+from tests.resources.ingestion_generation_answers import *
+
 
 nodes = [
     Node(

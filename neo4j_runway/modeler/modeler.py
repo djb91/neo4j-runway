@@ -4,12 +4,9 @@ from typing import Any, Dict, List, Optional, Union
 from graphviz import Digraph
 
 from ..discovery import Discovery
-from ..inputs import UserInput, user_input_safe_construct
-from ..llm.base import BaseDataModelingLLM
-from ..models import DataModel
-from ..resources.prompts.data_modeling import (
-    create_data_model_iteration_prompt,
-)
+from ..llm import LLM
+from ..models import DataModel, UserInput
+from ..resources.prompts.prompts import model_generation_rules, model_format
 
 
 class GraphDataModeler:

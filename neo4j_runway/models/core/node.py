@@ -1,9 +1,8 @@
-from typing import Dict, List, Optional, Union
+from typing import List, Dict, Union
 
 from pydantic import BaseModel, field_validator
 
 from ..arrows import ArrowsNode
-from ..solutions_workbench import SolutionsWorkbenchNode
 from .property import Property
 
 
