@@ -5,19 +5,6 @@ private/
 images/*.svg
 runway-mode-generation-flow-V2.png
 test.ipynb
-install_certificates_command.py
-# docs
-docs/.sass-cache
-docs/_site
-.sass-cache
-_site
-images/presentation
-/data/
-notebooks/
-*.ipynb
-.ruff_cache
-prepare_minor_release.sh
-prepare_patch_release.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

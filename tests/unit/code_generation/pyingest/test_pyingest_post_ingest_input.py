@@ -56,8 +56,9 @@ set t.var = 2;"""
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_cypher_file(self) -> None:
-        post_ingest_file_path: str = (
-            "tests/resources/cypher/pyingest_post_ingest.cypher"
+        post_ingest_file_path: str = "tests/resources/cypher/pyingest_post_ingest.cypher"
+        res = self.gen.generate_pyingest_yaml_string(
+            post_ingest_code=post_ingest_file_path
         )
         gen = PyIngestConfigGenerator(
             data_model=data_model,
@@ -69,10 +70,8 @@ set t.var = 2;"""
 
     def test_post_ingest_generation_from_cql_file(self) -> None:
         post_ingest_file_path: str = "tests/resources/cypher/pyingest_post_ingest.cql"
-        gen = PyIngestConfigGenerator(
-            data_model=data_model,
-            file_directory="./",
-            post_ingest_code=post_ingest_file_path,
+        res = self.gen.generate_pyingest_yaml_string(
+            post_ingest_code=post_ingest_file_path
         )
         res = gen.generate_config_string()
         self.assertEqual(res, ans)

@@ -2,12 +2,9 @@
 This file contains the objects to construct a data model as it is represented in arrows.app.
 """
 
-from typing import Any, Dict, List
+from typing import Dict, List, Any
 
 from pydantic import BaseModel
-
-from .node import ArrowsNode
-from .relationship import ArrowsRelationship
 
 from .node import ArrowsNode
 from .relationship import ArrowsRelationship
