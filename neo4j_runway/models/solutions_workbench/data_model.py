@@ -2,7 +2,6 @@
 This file contains a data model as it is represented in Solutions Workbench.
 """
 
-import json
 from typing import Any, Dict
 
 from pydantic import BaseModel
@@ -16,7 +15,7 @@ class SolutionsWorkbenchDataModel(BaseModel):
     relationshipTypes: Dict[str, SolutionsWorkbenchRelationship]
     metadata: Dict[str, Any] = dict()
 
-    def model_dump_json(self, **kwargs: Any) -> str:
+    def model_dump_json(self) -> str:
         """
         Overrides the Pydantic model_dump_json method.
 
@@ -33,12 +32,12 @@ class SolutionsWorkbenchDataModel(BaseModel):
             },
         }
 
-        return json.dumps(res, **kwargs)
+        return str(res)
 
     @property
-    def nodeLabels_json(self) -> Dict[str, Dict[str, Any]]:
-        return {k: v.model_dump() for (k, v) in self.nodeLabels.items()}
+    def nodeLabels_json(self):
+        return {k: v.to_json() for k, v in self.nodeLabels.items()}
 
     @property
-    def relationshipTypes_json(self) -> Dict[str, Dict[str, Any]]:
-        return {k: v.model_dump() for (k, v) in self.relationshipTypes.items()}
+    def relationshipTypes_json(self):
+        return {k: v.to_json() for k, v in self.relationshipTypes.items()}

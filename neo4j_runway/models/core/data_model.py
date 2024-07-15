@@ -4,7 +4,7 @@ This file contains the DataModel class which is the standard representation of a
 
 import json
 from ast import literal_eval
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Dict, Optional, Union
 
 import yaml
 from graphviz import Digraph
@@ -361,7 +361,7 @@ class DataModel(BaseModel):
             A String representation of the yaml file.
         """
 
-        yaml_string = yaml.dump(self.model_dump(exclude={"metadata"}))
+        yaml_string = yaml.dump(self.model_dump(exclude=["metadata"]))
 
         if write_file:
             with open(f"{file_path}", "w") as f:

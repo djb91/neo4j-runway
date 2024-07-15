@@ -2,7 +2,7 @@
 This file contains a relationship as it is represented in Solutions Workbench.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
