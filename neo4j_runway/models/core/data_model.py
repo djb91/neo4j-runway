@@ -14,7 +14,12 @@ from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
 from ...resources.prompts.prompts import model_generation_rules
-from ..solutions_workbench import SolutionsWorkbenchDataModel, SolutionsWorkbenchNode, SolutionsWorkbenchProperty, SolutionsWorkbenchRelationship
+from ..solutions_workbench import (
+    SolutionsWorkbenchDataModel,
+    SolutionsWorkbenchNode,
+    SolutionsWorkbenchProperty,
+    SolutionsWorkbenchRelationship,
+)
 from ...utils.naming_conventions import (
     fix_node_label,
     fix_property,
@@ -469,7 +474,9 @@ class DataModel(BaseModel):
                 "Unable to parse the provided arrows.app data model json file."
             )
 
-    def to_solutions_workbench(self, file_name: str = "data-model", write_file: bool = True) -> SolutionsWorkbenchDataModel:
+    def to_solutions_workbench(
+        self, file_name: str = "data-model", write_file: bool = True
+    ) -> SolutionsWorkbenchDataModel:
         """
         Output the data model to Solutions Workbench compatible JSON file.
 
@@ -492,14 +499,17 @@ class DataModel(BaseModel):
         for idx, n in enumerate(self.nodes):
             if (idx + 1) % 5 == 0:
                 y_current -= 200
-            sw_nodes[n.label] = (
-                n.to_solutions_workbench(key=n.label, x=NODE_SPACING * (idx % 5), y=y_current)
+            sw_nodes[n.label] = n.to_solutions_workbench(
+                key=n.label, x=NODE_SPACING * (idx % 5), y=y_current
             )
 
         solutions_workbench_data_model = SolutionsWorkbenchDataModel(
             nodeLabels=sw_nodes,
-            relationshipTypes={r.type+str(i): r.to_solutions_workbench(key=r.type+str(i)) for i, r in enumerate(self.relationships)},
-            metadata=self.metadata if self.metadata else dict()
+            relationshipTypes={
+                r.type + str(i): r.to_solutions_workbench(key=r.type + str(i))
+                for i, r in enumerate(self.relationships)
+            },
+            metadata=self.metadata if self.metadata else dict(),
         )
 
         if write_file:
@@ -528,4 +538,3 @@ class DataModel(BaseModel):
         DataModel
             An instance of a DataModel.
         """
-
