@@ -14,6 +14,7 @@ from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
 from ...resources.prompts.prompts import model_generation_rules
+from ..solutions_workbench import SolutionsWorkbenchDataModel, SolutionsWorkbenchNode, SolutionsWorkbenchProperty, SolutionsWorkbenchRelationship
 from ...utils.naming_conventions import (
     fix_node_label,
     fix_property,
@@ -468,18 +469,16 @@ class DataModel(BaseModel):
                 "Unable to parse the provided arrows.app data model json file."
             )
 
-    def to_solutions_workbench(
-        self, file_path: str = "data-model.json", write_file: bool = True
-    ) -> SolutionsWorkbenchDataModel:
+    def to_solutions_workbench(self, file_name: str = "data-model", write_file: bool = True) -> SolutionsWorkbenchDataModel:
         """
         Output the data model to Solutions Workbench compatible JSON file.
 
         Parameters
         ----------
-        file_path : str, optional
-            The file path to write if write_file = True, by default "data-model.json"
+        file_path : str
+            The location and name of the Solutions Workbench JSON file to import.
         write_file : bool, optional
-            Whether to write the file, by default True
+            Whether to write a file, by default True
 
         Returns
         -------
@@ -487,29 +486,24 @@ class DataModel(BaseModel):
             A representation of the data model in Solutions Workbench format.
         """
 
-        X_OFFSET: int = 500
         NODE_SPACING: int = 200
-        Y_OFFSET: int = 300
-        y_current = 0 + Y_OFFSET
+        y_current = 0
         sw_nodes = dict()
         for idx, n in enumerate(self.nodes):
             if (idx + 1) % 5 == 0:
                 y_current -= 200
-            sw_nodes[n.label] = n.to_solutions_workbench(
-                key=n.label, x=X_OFFSET + (NODE_SPACING * (idx % 5)), y=y_current
+            sw_nodes[n.label] = (
+                n.to_solutions_workbench(key=n.label, x=NODE_SPACING * (idx % 5), y=y_current)
             )
 
         solutions_workbench_data_model = SolutionsWorkbenchDataModel(
             nodeLabels=sw_nodes,
-            relationshipTypes={
-                r.type + str(i): r.to_solutions_workbench(key=r.type + str(i))
-                for i, r in enumerate(self.relationships)
-            },
-            metadata=self.metadata if self.metadata else dict(),
+            relationshipTypes={r.type+str(i): r.to_solutions_workbench(key=r.type+str(i)) for i, r in enumerate(self.relationships)},
+            metadata=self.metadata if self.metadata else dict()
         )
 
         if write_file:
-            with open(f"{file_path}", "w") as f:
+            with open(f"./{file_name}.json", "w") as f:
                 f.write(solutions_workbench_data_model.model_dump_json())
 
         return solutions_workbench_data_model
@@ -535,28 +529,3 @@ class DataModel(BaseModel):
             An instance of a DataModel.
         """
 
-        try:
-            with open(f"{file_path}", "r") as f:
-                content = json.loads(f.read())
-                node_id_to_label_map = {
-                    n["key"]: n["label"]
-                    for n in content["dataModel"]["nodeLabels"].values()
-                }
-                return cls(
-                    nodes=[
-                        Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
-                        for n in content["dataModel"]["nodeLabels"].values()
-                    ],
-                    relationships=[
-                        Relationship.from_solutions_workbench(
-                            SolutionsWorkbenchRelationship(**r),
-                            node_id_to_label_map=node_id_to_label_map,
-                        )
-                        for r in content["dataModel"]["relationshipTypes"].values()
-                    ],
-                    metadata=content["metadata"],
-                )
-        except Exception:
-            raise InvalidSolutionsWorkbenchDataModelError(
-                "Unable to parse the provided Solutions Workbench data model json file."
-            )
