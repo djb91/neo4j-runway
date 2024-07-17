@@ -4,6 +4,7 @@ This file contains the DataModel class which is the standard representation of a
 
 import json
 from ast import literal_eval
+import json
 from typing import Any, List, Dict, Optional, Union
 
 import yaml
@@ -17,7 +18,6 @@ from ...resources.prompts.prompts import model_generation_rules
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,
-    SolutionsWorkbenchProperty,
     SolutionsWorkbenchRelationship,
 )
 from ...utils.naming_conventions import (
@@ -434,44 +434,38 @@ class DataModel(BaseModel):
         DataModel
             An instance of a DataModel.
         """
-        try:
-            with open(f"{file_path}", "r") as f:
-                content = literal_eval(f.read())
-                node_id_to_label_map = {
-                    n["id"]: n["labels"][0] for n in content["nodes"]
-                }
-                return cls(
-                    nodes=[
-                        Node.from_arrows(
-                            ArrowsNode(
-                                id=n["id"],
-                                position=n["position"],
-                                labels=n["labels"],
-                                properties=n["properties"],
-                                caption=n["caption"],
-                                style=n["style"],
-                            )
+
+        with open(f"{file_path}", "r") as f:
+            content = literal_eval(f.read())
+            node_id_to_label_map = {n["id"]: n["labels"][0] for n in content["nodes"]}
+            return cls(
+                nodes=[
+                    Node.from_arrows(
+                        ArrowsNode(
+                            id=n["id"],
+                            position=n["position"],
+                            labels=n["labels"],
+                            properties=n["properties"],
+                            caption=n["caption"],
+                            style=n["style"],
                         )
-                        for n in content["nodes"]
-                    ],
-                    relationships=[
-                        Relationship.from_arrows(
-                            ArrowsRelationship(
-                                id=r["id"],
-                                fromId=r["fromId"],
-                                toId=r["toId"],
-                                properties=r["properties"],
-                                type=r["type"],
-                                style=r["style"],
-                            ),
-                            node_id_to_label_map=node_id_to_label_map,
-                        )
-                        for r in content["relationships"]
-                    ],
-                )
-        except Exception:
-            raise InvalidArrowsDataModelError(
-                "Unable to parse the provided arrows.app data model json file."
+                    )
+                    for n in content["nodes"]
+                ],
+                relationships=[
+                    Relationship.from_arrows(
+                        ArrowsRelationship(
+                            id=r["id"],
+                            fromId=r["fromId"],
+                            toId=r["toId"],
+                            properties=r["properties"],
+                            type=r["type"],
+                            style=r["style"],
+                        ),
+                        node_id_to_label_map=node_id_to_label_map,
+                    )
+                    for r in content["relationships"]
+                ],
             )
 
     def to_solutions_workbench(
@@ -493,14 +487,16 @@ class DataModel(BaseModel):
             A representation of the data model in Solutions Workbench format.
         """
 
-        NODE_SPACING: int = 50
-        y_current = 0
+        X_OFFSET: int = 500
+        NODE_SPACING: int = 200
+        Y_OFFSET: int = 300
+        y_current = 0 + Y_OFFSET
         sw_nodes = dict()
         for idx, n in enumerate(self.nodes):
             if (idx + 1) % 5 == 0:
-                y_current -= 50
+                y_current -= 200
             sw_nodes[n.label] = n.to_solutions_workbench(
-                key=n.label, x=NODE_SPACING * (idx % 5), y=y_current
+                key=n.label, x=X_OFFSET + (NODE_SPACING * (idx % 5)), y=y_current
             )
 
         solutions_workbench_data_model = SolutionsWorkbenchDataModel(
@@ -538,3 +534,25 @@ class DataModel(BaseModel):
         DataModel
             An instance of a DataModel.
         """
+
+        with open(f"{file_path}", "r") as f:
+            content = json.loads(f.read())
+            node_id_to_label_map = {
+                n["key"]: n["label"]
+                for n in content["dataModel"]["nodeLabels"].values()
+            }
+            return cls(
+                nodes=[
+                    Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
+                    # print(n, "\n")
+                    for n in content["dataModel"]["nodeLabels"].values()
+                ],
+                relationships=[
+                    Relationship.from_solutions_workbench(
+                        SolutionsWorkbenchRelationship(**r),
+                        node_id_to_label_map=node_id_to_label_map,
+                    )
+                    for r in content["dataModel"]["relationshipTypes"].values()
+                ],
+                metadata=content["metadata"],
+            )
