@@ -1,29 +1,11 @@
 ---
 permalink: /api/data-model/
-title: DataModel
 toc: true
 toc_label: DataModel
 toc_icon: "fa-solid fa-plane"
 ---
-
-    from neo4j_runway import DataModel
-
+# DataModel
 This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format. 
-
-
- The standard Graph Data Model representation in Neo4j
-        Runway.
-
-    Attributes
-    ----------
-    nodes : List[Node]
-        A list of the nodes in the data model.
-    relationships : List[Relationship]
-        A list of the relationships in the data model.
-    metadata: Optional[Dict[str, Any]]
-        Metadata from an import source such as Solutions
-        Workbench.
-
 
 
 ## Class Methods
@@ -33,7 +15,7 @@ This is the core data model class of Neo4j Runway. All imported data models will
 The standard Graph Data Model representation in Neo4j
         Runway.
 
-    Parameters
+    Attributes
     ----------
     nodes : List[Node]
         A list of the nodes in the data model.
@@ -53,6 +35,10 @@ Apply Neo4j naming conventions to all labels,
         relationships and properties in the data model.
     This is typically performed within the __init__ method
         automatically.
+
+    Returns
+    -------
+    None
 
 
 ### to_arrows
@@ -133,10 +119,7 @@ Perform additional validation on the data model.
 
     Returns
     -------
-    Dict[str, Any]
-        A dictionary containing keys 'valid' indicating
-        whether the data model is valid and 'message'
-        containing a list of errors.
+    None
 
 
 ### visualize

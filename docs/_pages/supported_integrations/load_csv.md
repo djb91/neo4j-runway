@@ -1,7 +1,8 @@
 ---
 permalink: /supported-integrations/load-csv/
-title: "LOAD CSV"
 ---
+
+# LOAD CSV 
 
 [Documentation](https://neo4j.com/docs/cypher-manual/current/clauses/load-csv/) | 
 

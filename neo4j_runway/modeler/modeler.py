@@ -44,17 +44,17 @@ class GraphDataModeler:
         llm: BaseDataModelingLLM,
         discovery: Union[str, Discovery] = "",
         user_input: Union[Dict[str, str], UserInput] = dict(),
-        general_data_description: Optional[str] = None,
-        numeric_data_description: Optional[str] = None,
-        categorical_data_description: Optional[str] = None,
-        feature_descriptions: Optional[Dict[str, str]] = None,
+        general_data_description: str = "",
+        numeric_data_description: str = "",
+        categorical_data_description: str = "",
+        feature_descriptions: str = "",
         allowed_columns: List[str] = list(),
     ) -> None:
         """
         Takes an LLM instance and Discovery information.
         Either a Discovery object can be provided, or each field can be provided individually.
 
-        Parameters
+        Attributes
         ----------
         llm : BaseLLM
             The LLM used to generate data models.
@@ -64,14 +64,16 @@ class GraphDataModeler:
         user_input : Union[Dict[str, str], UserInput], optional
             Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default {}
         general_data_description : str, optional
-            A general data description provided by Pandas, by default None
+            A general data description provided by Pandas, by default ""
         numeric_data_description : str, optional
-            A numeric data description provided by Pandas, by default None
+            A numeric data description provided by Pandas, by default ""
         categorical_data_description : str, optional
-            A categorical data description provided by Pandas, by default None
-        feature_descriptions : Dict[str, str], optional
-            Feature (column) descriptions provided by Discovery, by default None
-        columns_of_interest : List[str]
+            A categorical data description provided by Pandas, by default ""
+        feature_descriptions : str, optional
+            Feature (column) descriptions provided by Discovery, by default ""
+        allowed_columns : List[str], optional
+            The columns that may be used in the data model. The argument should only be used in no columns are specified in
+            the discovery or user_input arguments. By default []
         """
 
         self.llm = llm
@@ -88,15 +90,10 @@ class GraphDataModeler:
             self.feature_descriptions = discovery.user_input.column_descriptions
 
         else:
-            if not allowed_columns and not user_input:
-                raise ValueError(
-                    "Not enough information provided. Please provide a Discovery object to the discovery arg, user_input or allowed_columns."
-                )
-            # we convert all user_input to a UserInput object
-            if not isinstance(user_input, UserInput):
-                self.user_input = user_input_safe_construct(
-                    unsafe_user_input=user_input, allowed_columns=allowed_columns
-                )
+
+            if isinstance(user_input, UserInput):
+                self.user_input = user_input._formatted_dict
+
             else:
                 self.user_input = user_input
 
@@ -212,25 +209,110 @@ class GraphDataModeler:
             else self.model_history[version]
         )
 
-    def create_initial_model(
-        self, max_retries: int = 3, use_yaml_data_model: bool = False
-    ) -> Union[DataModel, Dict[str, Any]]:
+    def _generate_initial_data_model_prompt(self) -> str:
+        """
+        Generate the initial data model request prompt.
+        """
+
+        gen_description_clause = (
+            f"""
+This is a general description of the data:
+{self.user_input['general_description']}
+"""
+            if "general_description" in self.user_input
+            else ""
+        )
+
+        prompt = f"""
+Here is the csv data information:
+{gen_description_clause}
+
+The following is a summary of the data features, data types, and missing values:
+{self.general_info}
+
+The following is a description of each feature in the data:
+{self.feature_descriptions}
+
+Here is the initial discovery findings:
+{self.discovery}
+
+Based upon your knowledge of the data in my .csv and 
+of high-quality Neo4j graph data models, I would like you to return your
+suggestion for translating the data in my .csv into a Neo4j graph data model.
+
+{model_generation_rules}
+
+{model_format}
+            """
+        return prompt
+
+    def _generate_data_model_iteration_prompt(
+        self,
+        user_corrections: Union[str, None] = None,
+        use_yaml_data_model: bool = False,
+    ) -> str:
+        """
+        Generate the prompt to iterate on the previous data model.
+        """
+
+        if user_corrections is not None:
+            user_corrections = (
+                "Focus on this feedback when refactoring the model: \n"
+                + user_corrections
+            )
+        else:
+            user_corrections = """
+                                Add features from the csv to each node and relationship as properties. 
+                                Ensure that these properties provide value to their respective node or relationship.
+                                """
+
+        gen_description_clause = (
+            f"""
+This is a general description of the data:
+{self.user_input['general_description']}
+"""
+            if "general_description" in self.user_input
+            else ""
+        )
+
+        prompt = f"""
+Here is the csv data information:
+{gen_description_clause}
+
+The following is a summary of the data features, data types, and missing values:
+{self.general_info}
+
+The following is a description of each feature in the data:
+{self.feature_descriptions}
+
+Here is the initial discovery findings:
+{self.discovery}
+
+Based on your experience building high-quality graph data
+models, are there any improvements you would suggest to this model?
+{self.current_model.to_yaml(write_file=False) if use_yaml_data_model else self.current_model}
+
+{user_corrections}
+
+{model_generation_rules}
+"""
+
+        return prompt
+
+    def create_initial_model(self) -> DataModel:
         """
         Generate the initial model. This must be ran before a model can be interated on.
         You may access this model with the `get_model` method and providing `version=1`.
 
         Returns
         -------
-        Union[DataModel, str]
-            The generated data model if a valid model is generated.
-            A dictionary containing information about the failed generation attempt.
+        DataModel
+            The generated data model.
         """
 
-        response = self.llm._get_initial_data_model_response(
-            discovery_text=self.discovery,
-            user_input=self.user_input,
-            max_retries=max_retries,
-            use_yaml_data_model=use_yaml_data_model,
+        response = self.llm._get_data_model_response(
+            formatted_prompt=self._generate_initial_data_model_prompt(),
+            csv_columns=self.columns_of_interest,
         )
         if not isinstance(response, DataModel):
             return response
@@ -273,10 +355,7 @@ class GraphDataModeler:
         def iterate() -> DataModel:
             for _ in range(0, iterations):
                 response = self.llm._get_data_model_response(
-                    formatted_prompt=create_data_model_iteration_prompt(
-                        discovery_text=self.discovery,
-                        user_input=self.user_input,
-                        data_model_to_modify=self.current_model,
+                    formatted_prompt=self._generate_data_model_iteration_prompt(
                         user_corrections=user_corrections,
                         use_yaml_data_model=use_yaml_data_model,
                     ),

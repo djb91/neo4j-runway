@@ -1,14 +1,10 @@
 ---
 permalink: /api/utils/
-title: test_database_connection
 toc: true
 toc_label: test_database_connection
 toc_icon: "fa-solid fa-plane"
 ---
-
-    from neo4j_runway.utils import test_database_connection
-
-
+# test_database_connection
 
 Verify accurate credentials upon user submission.
 

@@ -1,29 +1,22 @@
 import inspect
-import os
 import textwrap
 from typing import List
-
-import regex as re
+import os
 
 from neo4j_runway import (
     DataModel,
+    IngestionGenerator,
     Discovery,
+    LLM,
     GraphDataModeler,
     UserInput,
 )
-from neo4j_runway.code_generation import (
-    LoadCSVCodeGenerator,
-    PyIngestConfigGenerator,
-    StandardCypherCodeGenerator,
-)
-from neo4j_runway.database import Neo4jGraph
-from neo4j_runway.llm.openai import OpenAIDataModelingLLM, OpenAIDiscoveryLLM
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
 # Map features
 #   * class             : The Neo4j Runway Class being documented.
 #   * file_path         : The file path from ./docs/_pages/ to write the file to.
-#                         Also the site extension location ex: api/data_model.md lives at http://site.com/neo4j-runway/api/data_model/
+#                         Also the site extension location ex: api/data_model.md lives at http://site.com/neo4j-runway/api/data-model/
 #   * summary_file_path : The file path from ./docs/summaries/ of the summary Markdown file, if any/.
 #                         This text will be injected below the page header before Class methods and properties are displayed.
 
@@ -34,49 +27,21 @@ CLASS_DIR = [
         "summary_file_path": "data_model.md",
     },
     {
-        "class": Discovery,
-        "file_path": "api/discovery.md",
-        "summary_file_path": "discovery.md",
+        "class": IngestionGenerator,
+        "file_path": "api/ingestion_generator.md",
+        "summary_file_path": "",
     },
+    {"class": Discovery, "file_path": "api/discovery.md", "summary_file_path": ""},
     {
         "class": GraphDataModeler,
         "file_path": "api/graph_data_modeler.md",
-        "summary_file_path": "graph_data_modeler.md",
+        "summary_file_path": "",
     },
-    {
-        "class": OpenAIDiscoveryLLM,
-        "file_path": "api/llm/openai_discovery_llm.md",
-        "summary_file_path": "openai_discovery_llm.md",
-    },
-    {
-        "class": OpenAIDataModelingLLM,
-        "file_path": "api/llm/openai_data_modeling_llm.md",
-        "summary_file_path": "openai_data_modeling_llm.md",
-    },
-    {
-        "class": Neo4jGraph,
-        "file_path": "api/database/neo4j_graph.md",
-        "summary_file_path": "neo4j_graph.md",
-    },
+    {"class": LLM, "file_path": "api/llm.md", "summary_file_path": ""},
     {
         "class": UserInput,
         "file_path": "api/inputs.md",
-        "summary_file_path": "inputs.md",
-    },
-    {
-        "class": PyIngestConfigGenerator,
-        "file_path": "api/code_generator/pyingest_config_generator.md",
-        "summary_file_path": "pyingest_config_generator.md",
-    },
-    {
-        "class": LoadCSVCodeGenerator,
-        "file_path": "api/code_generator/load_csv_code_generator.md",
-        "summary_file_path": "load_csv_code_generator.md",
-    },
-    {
-        "class": StandardCypherCodeGenerator,
-        "file_path": "api/code_generator/standard_cypher_code_generator.md",
-        "summary_file_path": "standard_cypher_code_generator.md",
+        "summary_file_path": "",
     },
 ]
 
@@ -105,19 +70,6 @@ def get_method_docstrings_of_class(class_of_interest) -> List[str]:
     ]
 
 
-def get_attributes(class_of_interest) -> str:
-    parts = re.split("(   Attributes)", class_of_interest.__doc__)
-    parts[0] = parts[0].replace("   ", "")
-    combined = "".join(parts)
-    res = ""
-    for line in combined.split("\n"):
-        res += (
-            textwrap.fill(line, subsequent_indent="        ", width=MAX_TEXT_WIDTH)
-            + "\n"
-        )
-    return res
-
-
 def get_properties_of_class(class_of_interest) -> List[str]:
     ignored_props = {"__fields_set__", "model_extra", "model_fields_set"}
     return [
@@ -144,9 +96,8 @@ def format_content(class_of_interest, summary_file_path: str) -> str:
     methods_as_strings = get_method_docstrings_of_class(class_of_interest)
     properties_as_strings = get_properties_of_class(class_of_interest)
     summary_string = read_summary(summary_file_path) + "\n" if summary_file_path else ""
-    attributes = get_attributes(class_of_interest=class_of_interest)
-    content = f"""{summary_string}
-{attributes}
+    content = f"""# {class_name_string}
+{summary_string}
 
 ## Class Methods
 
@@ -172,7 +123,6 @@ def format_content(class_of_interest, summary_file_path: str) -> str:
 def create_front_matter(label: str, file_path: str) -> str:
     return f"""---
 permalink: /{file_path[:-3].replace("_", "-")}/
-title: {label}
 toc: true
 toc_label: {label}
 toc_icon: "fa-solid fa-plane"

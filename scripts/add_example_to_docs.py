@@ -1,17 +1,10 @@
 import argparse
 import os
 from typing import Any, Dict
+
 from urllib.request import urlopen
-
-import nbformat
 from nbconvert import MarkdownExporter
-
-
-def drop_notebook_header(notebook):
-    header_cell = notebook["cells"][0]
-    header = header_cell["source"][2:]
-    notebook["cells"] = notebook["cells"][1:]
-    return header, notebook
+import nbformat
 
 
 def import_notebook(file_path: str) -> Any:
@@ -20,22 +13,20 @@ def import_notebook(file_path: str) -> Any:
     Example notebooks MUST be stored in the repo "https://github.com/a-s-g93/neo4j-runway-examples".
     Outside examples will not be accepted.
     """
-    print("importing file", file_path)
+    print("importing file")
     url = f"https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/{file_path}"
     response = urlopen(url).read().decode()
 
-    return drop_notebook_header(nbformat.reads(response, as_version=4))
+    return nbformat.reads(response, as_version=4)
 
 
-def write_example_page(
-    notebook_dict: Dict[str, Any], notebook_name: str, header: str
-) -> None:
+def write_example_page(notebook_dict: Dict[str, Any], notebook_name: str) -> None:
     """
     The example will be saved to "docs/examples/notebook_name/notebook_name.md".
     svg files will be saved to "docs/examples/notebook_name/notebook_name_files/"
     Images will need to be manually added to "docs/examples/images/".
     """
-    print("writing file", notebook_name)
+    print("writing file")
 
     markdown_exporter = MarkdownExporter(template_name="markdown", preprocessors=[])
 
@@ -51,9 +42,8 @@ def write_example_page(
         f.write(
             f"""---
 permalink: /examples/{notebook_name.replace("_", "-")}/
-title: {header}
 toc: true
-toc_label:
+toc_label: 
 toc_icon: "fa-solid fa-plane"
 ---
 """
@@ -70,5 +60,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     notebook_name = args.notebook_path.split("/")[-1][:-6]
-    header, nb = import_notebook(file_path=args.notebook_path)
-    write_example_page(notebook_dict=nb, notebook_name=notebook_name, header=header)
+    nb = import_notebook(file_path=args.notebook_path)
+    write_example_page(notebook_dict=nb, notebook_name=notebook_name)

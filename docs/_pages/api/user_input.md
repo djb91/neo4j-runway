@@ -1,8 +1,5 @@
 ---
-permalink: /api/inputs/
-toc: true
-toc_label: UserInput
-toc_icon: "fa-solid fa-plane"
+permalink: /api/user-input/
 ---
 # UserInput
 
@@ -10,12 +7,14 @@ toc_icon: "fa-solid fa-plane"
 ## Class Methods
 
 
-### __init__
+__init__
+---
 A container for user provided information about the
         data.
 
     Attributes
     ----------
+
     general_description : str, optional
         A general description of the CSV data, by default =
         ""
@@ -26,4 +25,14 @@ A container for user provided information about the
         columns are
         evaluated in discovery and used to generate a data
         model.
+
+
+
+## Class Properties
+
+
+_formatted_dict
+---
+Dictionary representation of the user input to be used
+        in Discovery.
 

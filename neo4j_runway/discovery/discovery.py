@@ -47,13 +47,13 @@ class Discovery:
         self,
         data: pd.DataFrame,
         user_input: Union[Dict[str, str], UserInput] = dict(),
-        llm: Optional[BaseDiscoveryLLM] = None,
+        llm: LLM = None,
         pandas_only: bool = False,
     ) -> None:
         """
         The Discovery module that handles summarization and discovery generation via an LLM.
 
-        Parameters
+        Attributes
         ----------
         llm : LLM, optional
             The LLM instance used to generate data discovery. Only required if pandas_only = False.
@@ -65,12 +65,8 @@ class Discovery:
         pandas_only : bool
             Whether to only generate discovery using Pandas. Will not call the LLM service.
         """
-
-        # we convert all user_input to a UserInput object
-        if not isinstance(user_input, UserInput):
-            self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input, allowed_columns=data.columns
-            )
+        if isinstance(user_input, UserInput):
+            self.user_input = user_input._formatted_dict
         else:
             self.user_input = user_input
 
@@ -112,18 +108,17 @@ class Discovery:
             Whether to print the generated discovery upon retrieval.
         notebook : bool
             Whether code is executed in a notebook. Affects the result print formatting.
+
+        Returns
+        ----------
+        None
         """
 
         self._generate_csv_summary()
 
-        if not self.pandas_only and self.llm is not None:
+        if not self.pandas_only:
             response = self.llm._get_discovery_response(
-                formatted_prompt=create_discovery_prompt(
-                    pandas_general_description=self.df_info,
-                    pandas_categorical_feature_descriptions=self.categorical_data_description,
-                    pandas_numeric_feature_descriptions=self.numeric_data_description,
-                    user_input=self.user_input,
-                )
+                formatted_prompt=self._generate_discovery_prompt()
             )
         else:
             response = f"""Here are Summary Statistics generated with the Pandas Python library
@@ -149,6 +144,10 @@ class Discovery:
         ----------
         notebook : bool, optional
             Whether executing in a notebook, by default True
+
+        Returns
+        ----------
+        None
         """
 
         print(self.discovery) if not notebook else display(Markdown(self.discovery))

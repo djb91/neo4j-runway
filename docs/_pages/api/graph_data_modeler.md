@@ -1,47 +1,10 @@
 ---
 permalink: /api/graph-data-modeler/
-title: GraphDataModeler
 toc: true
 toc_label: GraphDataModeler
 toc_icon: "fa-solid fa-plane"
 ---
-
-    from neo4j_runway import GraphDataModeler
-
-
- This class is responsible for generating a graph data model
-        via communication with an LLM.
- It handles prompt generation, model generation history as
-        well as access to the generated data models.
-
-     Attributes
-    ----------
-    llm : BaseLLM
-        The LLM used to generate data models.
-    discovery : Union[str, Discovery], optional
-        Either a string containing the LLM generated
-        discovery or a Discovery object that has been run.
-        If a Discovery object is provided then the remaining
-        discovery attributes don't need to be provided.
-    user_input : Union[Dict[str, str], UserInput], optional
-        Either a dictionary with keys general_description
-        and column names with descriptions or a UserInput
-        object.
-    general_data_description : str, optional
-        A general data description provided by Pandas.
-    numeric_data_description : str, optional
-        A numeric data description provided by Pandas.
-    categorical_data_description : str, optional
-        A categorical data description provided by Pandas.
-    feature_descriptions : Dict[str, str], optional
-        Feature (column) descriptions provided by Discovery.
-    columns_of_interest : List[str], optional
-        The columns that may be used in the data model.
-    model_iterations: int
-        The number of times a valid model has been returned.
-    model_history: List[DataModel]
-        A list of all valid models generated.
-
+# GraphDataModeler
 
 
 ## Class Methods
@@ -52,9 +15,9 @@ Takes an LLM instance and Discovery information.
     Either a Discovery object can be provided, or each field
         can be provided individually.
 
-    Parameters
+    Attributes
     ----------
-    llm : BaseLLM
+    llm : LLM
         The LLM used to generate data models.
     discovery : Union[str, Discovery], optional
         Either a string containing the LLM generated
@@ -62,23 +25,27 @@ Takes an LLM instance and Discovery information.
         If a Discovery object is provided then the remaining
         discovery attributes don't need to be provided, by
         default ""
-    user_input : Union[Dict[str, str], UserInput], optional
+    user_input : Dict[str, UserInput], optional
         Either a dictionary with keys general_description
         and column names with descriptions or a UserInput
         object, by default {}
     general_data_description : str, optional
         A general data description provided by Pandas, by
-        default None
+        default ""
     numeric_data_description : str, optional
         A numeric data description provided by Pandas, by
-        default None
+        default ""
     categorical_data_description : str, optional
         A categorical data description provided by Pandas,
-        by default None
-    feature_descriptions : Dict[str, str], optional
+        by default ""
+    feature_descriptions : str, optional
         Feature (column) descriptions provided by Discovery,
-        by default None
-    columns_of_interest : List[str]
+        by default ""
+    allowed_columns : List[str], optional
+        The columns that may be used in the data model. The
+        argument should only be used in no columns are
+        specified in
+        the discovery or user_input arguments. By default []
 
 
 ### create_initial_model
@@ -89,11 +56,8 @@ Generate the initial model. This must be ran before a
 
     Returns
     -------
-    Union[DataModel, str]
-        The generated data model if a valid model is
-        generated.
-        A dictionary containing information about the failed
-        generation attempt.
+    DataModel
+        The generated data model.
 
 
 ### get_model

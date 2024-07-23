@@ -312,6 +312,10 @@ class DataModel(BaseModel):
         """
         Apply Neo4j naming conventions to all labels, relationships and properties in the data model.
         This is typically performed within the __init__ method automatically.
+
+        Returns
+        -------
+        None
         """
 
         # fix node labels and properties
@@ -328,7 +332,7 @@ class DataModel(BaseModel):
             for prop in rel.properties:
                 prop.name = fix_property(prop.name)
 
-    def to_json(self, file_path: str = "data-model.json") -> Dict[str, Any]:
+    def to_json(self, file_path: str = "data-model.json") -> Dict[str, any]:
         """
         Output the data model to a json file.
 
@@ -469,17 +473,17 @@ class DataModel(BaseModel):
             )
 
     def to_solutions_workbench(
-        self, file_name: str = "data-model", write_file: bool = True
+        self, file_path: str = "data-model.json", write_file: bool = True
     ) -> SolutionsWorkbenchDataModel:
         """
         Output the data model to Solutions Workbench compatible JSON file.
 
         Parameters
         ----------
-        file_path : str
-            The location and name of the Solutions Workbench JSON file to import.
+        file_path : str, optional
+            The file path to write if write_file = True, by default "data-model.json"
         write_file : bool, optional
-            Whether to write a file, by default True
+            Whether to write the file, by default True
 
         Returns
         -------
@@ -509,7 +513,7 @@ class DataModel(BaseModel):
         )
 
         if write_file:
-            with open(f"./{file_name}.json", "w") as f:
+            with open(f"{file_path}", "w") as f:
                 f.write(solutions_workbench_data_model.model_dump_json())
 
         return solutions_workbench_data_model

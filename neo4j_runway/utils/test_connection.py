@@ -27,6 +27,7 @@ def test_database_connection(
     {"valid": valid, "message": "Connection and Auth Verified!"}
     """
 
+    valid = True
     try:
         d = GraphDatabase.driver(
             credentials["uri"], auth=(credentials["username"], credentials["password"])

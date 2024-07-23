@@ -1,7 +1,8 @@
 ---
 permalink: /supported-integrations/pyingest/
-title: "PyIngest"
 ---
+
+# PyIngest
 
 [GitHub](https://github.com/neo4j-field/pyingest) | 
 

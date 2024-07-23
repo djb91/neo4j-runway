@@ -4,13 +4,16 @@
 all: help
 
 test:
-	pytest tests
+	python3 -m unittest tests.all_test_runner
+
+test_free:
+	python3 -m unittest tests.free_test_runner
 
 test_integration:
-	poetry run pytest tests/integration --ignore=tests/integration/code_generation/load_csv
+	python3 -m unittest tests.test_integration.paid_integration_test_runner
 
 test_unit:
-	poetry run pytest tests/unit
+	python3 -m unittest tests.unit_test_runner
 
 init:
 	poetry install --with dev
@@ -40,6 +43,21 @@ docs_add_example:
 	 python3 scripts/add_example_to_docs.py --notebook_path=$(file_path)
 
 ######################
+# DOCUMENTATION
+######################
+
+docs_preview:
+	BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve --source docs/
+
+docs_refresh:
+	python3 scripts/refresh_class_documentation.py
+	python3 scripts/refresh_function_documentation.py
+	python3 scripts/update_docs_version.py
+
+docs_add_example:
+	 python3 scripts/add_example_to_docs.py --notebook_path=$(file_path)
+
+######################
 # HELP
 ######################
 
@@ -51,5 +69,6 @@ help:
 	@echo 'docs_refresh................ - refresh documentation for all public classes and functions'
 	@echo 'format...................... - run code formatters'
 	@echo 'test........................ - run all unit and integration tests'
+	@echo 'test_free................... - run all free unit and integration tests'
 	@echo 'test_unit................... - run all free unit tests'
-	@echo 'test_integration............ - run all integration tests'
+	@echo 'test_integration............ - run all integration tests'	
