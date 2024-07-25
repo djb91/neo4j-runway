@@ -23,6 +23,7 @@ class Node(BaseModel):
 
     label: str
     properties: List[Property]
+    properties: List[Property]
     csv_name: str = ""
 
     def __init__(
@@ -36,6 +37,8 @@ class Node(BaseModel):
         ----------
         label : str
             The node label.
+        properties : List[Property]
+            A list of the properties within the node.
         properties : List[Property]
             A list of the properties within the node.
         csv_name : str, optional
@@ -143,9 +146,11 @@ class Node(BaseModel):
     def node_keys(self) -> List[Property]:
         """
         The node key properties, if any.
+        The node key properties, if any.
 
         Returns
         -------
+        List[Property]
         List[Property]
             A list of the properties that make up a node key, if any.
         """
@@ -201,27 +206,19 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
-    def validate_properties(self, csv_columns: List[str]) -> List[Optional[str]]:
-        errors: List[Optional[str]] = []
+    def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
+        errors = []
 
         for prop in self.properties:
             if prop.csv_mapping not in csv_columns:
                 errors.append(
                     f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
                 )
-            if prop.is_unique and prop.part_of_key:
-                errors.append(
-                    f"The node {self.label} has the property {prop.name} identified as unique and a node key. Assume uniqueness and set part_of_key to False."
-                )
 
         if len(self.node_keys) == 1:
-            # only write error if this node is NOT also labeled as unique
-            if self.node_keys[0].name not in [
-                prop.name for prop in self.unique_properties
-            ]:
-                errors.append(
-                    f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
-                )
+            errors.append(
+                f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
+            )
         return errors
 
     def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:

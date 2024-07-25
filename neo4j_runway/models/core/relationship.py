@@ -6,7 +6,6 @@ from .property import Property
 from ..arrows import ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchRelationship,
-    SolutionsWorkbenchProperty,
 )
 
 
@@ -109,10 +108,13 @@ class Relationship(BaseModel):
 
     @property
     def relationship_keys(self) -> List[Property]:
+    def relationship_keys(self) -> List[Property]:
         """
+        The relationship's key properties, if any.
         The relationship's key properties, if any.
         """
 
+        return [prop for prop in self.properties if prop.part_of_key]
         return [prop for prop in self.properties if prop.part_of_key]
 
     @property
@@ -162,19 +164,10 @@ class Relationship(BaseModel):
                     errors.append(
                         f"The relationship {self.type} the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from relationship {self.type}."
                     )
-                if prop.is_unique and prop.part_of_key:
-                    errors.append(
-                        f"The relationship {self.type} has the property {prop.name} identified as unique and a relationship key. Assume uniqueness and set part_of_key to False."
-                    )
-
         if len(self.relationship_keys) == 1:
-            # only write error if this node is NOT also labeled as unique
-            if self.relationship_keys[0].name not in [
-                prop.name for prop in self.unique_properties
-            ]:
-                errors.append(
-                    f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
-                )
+            errors.append(
+                f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
+            )
         return errors
 
     def to_arrows(self) -> ArrowsRelationship:
