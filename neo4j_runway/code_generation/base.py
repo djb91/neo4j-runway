@@ -2,14 +2,14 @@
 This file contains the base conde generator class. All code generation classes must inherit from this class.
 """
 
-import os
 from abc import ABC
-from typing import Any, Dict
+import os
+from typing import Dict, Any
 
 import yaml
 
-from ..models import DataModel
 from .cypher import *
+from ..models import DataModel
 
 
 class folded_unicode(str):
@@ -20,11 +20,11 @@ class literal_unicode(str):
     pass
 
 
-def folded_unicode_representer(dumper: Any, data: Any) -> Any:
+def folded_unicode_representer(dumper, data):
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=">")
 
 
-def literal_unicode_representer(dumper: Any, data: Any) -> Any:
+def literal_unicode_representer(dumper, data):
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
 
 
@@ -48,7 +48,7 @@ class BaseCodeGenerator(ABC):
         """
         This is the base class for code generation. All code generation classes must inherit from this class.
 
-        Parameters
+        Attributes
         ----------
         data_model : DataModel
             The data model to base ingestion code on.
@@ -77,7 +77,7 @@ class BaseCodeGenerator(ABC):
     def _generate_base_cypher(
         self,
         strict_typing: bool = True,
-    ) -> None:
+    ):
         for node in self.data_model.nodes:
             if len(node.unique_properties_column_mapping) > 0:
                 # unique constraints
@@ -175,7 +175,7 @@ class BaseCodeGenerator(ABC):
         to_return = ""
 
         for cypher in self._cypher:
-            to_return = to_return + self._cypher[cypher]["cypher"] + ";\n"
+            to_return = to_return + self._cypher[cypher]["cypher"]
 
         return to_return
 

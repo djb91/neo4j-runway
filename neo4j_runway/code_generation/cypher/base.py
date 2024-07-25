@@ -4,27 +4,7 @@ This file contains the functions to create MATCH, MERGE and SET queries.
 
 from typing import List, Optional
 
-from ..models import Property, Node, Relationship
-
-
-def generate_constraints_key(
-    label_or_type: str, unique_property: Union[Property, List[Property]]
-) -> str:
-    """
-    Generate the key for a unique or node key constraint.
-    """
-    if isinstance(unique_property, Property):
-        return f"{label_or_type.lower()}_{unique_property.name.lower()}"
-    else:
-        return f"{label_or_type.lower()}_{'_'.join([x.name.lower() for x in unique_property])}"
-
-
-def generate_constraint(label_or_type: str, unique_property: Property) -> str:
-    """
-    Generate a constrant string.
-    """
-
-    return f"CREATE CONSTRAINT {label_or_type.lower()}_{unique_property.name.lower()} IF NOT EXISTS FOR (n:{label_or_type}) REQUIRE n.{unique_property.name} IS UNIQUE;\n"
+from ...models import Property, Node, Relationship
 
 
 def generate_match_node_clause(node: Node) -> str:
@@ -121,23 +101,16 @@ def generate_merge_node_load_csv_clause(
         raise ValueError("Either `node` or `standard_clause` arg must be provided!")
 
     command = ":auto " if method == "browser" else ""
-    if not standard_clause and node is not None:
+    if not standard_clause:
         standard_clause = generate_merge_node_clause_standard(
             node=node, strict_typing=strict_typing
         )
-    if standard_clause is not None:
-        standard_clause = (
-            standard_clause.strip().split("\n", 2)[2].replace("\n", "\n    ")
-        )
-    else:
-        raise LoadCSVCypherGenerationError(
-            "Unable to construct MERGE node clause for LOAD CSV from provided arguments."
-        )
+    standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
 
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    {standard_clause.strip()}
+    {standard_clause}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
@@ -185,30 +158,18 @@ def generate_merge_relationship_load_csv_clause(
         )
 
     command = ":auto " if method == "browser" else ""
-    if (
-        not standard_clause
-        and relationship is not None
-        and source_node is not None
-        and target_node is not None
-    ):
+    if not standard_clause:
         standard_clause = generate_merge_relationship_clause_standard(
             relationship=relationship,
             source_node=source_node,
             target_node=target_node,
             strict_typing=strict_typing,
         )
-    if standard_clause is not None:
-        standard_clause = (
-            standard_clause.strip().split("\n", 2)[2].replace("\n", "\n    ")
-        )
-    else:
-        raise LoadCSVCypherGenerationError(
-            "Unable to construct MERGE relationship clause for LOAD CSV from provided arguments."
-        )
+    standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    {standard_clause.strip()}
+    {standard_clause}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 

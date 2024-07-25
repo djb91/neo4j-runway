@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
 from neo4j_runway.utils import test_database_connection
-from neo4j_runway.ingestion import IngestionGenerator
+from neo4j_runway.code_generation import LoadCSVCodeGenerator
 from neo4j_runway.models import DataModel
 
 load_dotenv()
@@ -63,11 +63,13 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
         )
 
         gen = LoadCSVCodeGenerator(data_model=data_model, csv_name="", method="api")
+        gen = LoadCSVCodeGenerator(data_model=data_model, csv_name="", method="api")
 
-        load_csv_cypher = gen.generate_load_csv_cypher_string()
+        load_csv_cypher = gen.generate_cypher_string()
 
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:
+            print(query)
             with cls.driver.session(database=database) as session:
                 session.run(query=query)
 

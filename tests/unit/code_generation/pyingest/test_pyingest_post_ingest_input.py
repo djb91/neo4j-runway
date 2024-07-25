@@ -2,7 +2,7 @@ import unittest
 from typing import List
 
 from neo4j_runway.models import Node, Relationship, Property, DataModel
-from neo4j_runway.ingestion.generate_ingest import IngestionGenerator
+from neo4j_runway.code_generation import PyIngestConfigGenerator
 
 
 nodes = [
@@ -42,6 +42,10 @@ class TestIngestPostIngestInput(unittest.TestCase):
             data_model=data_model, file_directory="./", post_ingest_code=post_ingest
         )
         res = gen.generate_config_string()
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", post_ingest_code=post_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_string_b(self) -> None:
@@ -53,14 +57,15 @@ set t.var = 2;"""
             data_model=data_model, file_directory="./", post_ingest_code=post_ingest
         )
         res = gen.generate_config_string()
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", post_ingest_code=post_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_cypher_file(self) -> None:
         post_ingest_file_path: str = (
             "tests/resources/cypher/pyingest_post_ingest.cypher"
-        )
-        res = self.gen.generate_pyingest_yaml_string(
-            post_ingest_code=post_ingest_file_path
         )
         gen = PyIngestConfigGenerator(
             data_model=data_model,
@@ -72,9 +77,12 @@ set t.var = 2;"""
 
     def test_post_ingest_generation_from_cql_file(self) -> None:
         post_ingest_file_path: str = "tests/resources/cypher/pyingest_post_ingest.cql"
-        res = self.gen.generate_pyingest_yaml_string(
-            post_ingest_code=post_ingest_file_path
+        gen = PyIngestConfigGenerator(
+            data_model=data_model,
+            file_directory="./",
+            post_ingest_code=post_ingest_file_path,
         )
+        res = gen.generate_config_string()
         res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
@@ -83,6 +91,10 @@ set t.var = 2;"""
             "create (t:Test)\nset t.var = 1",
             "create (t:Test2)\nset t.var = 2",
         ]
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", post_ingest_code=post_ingest
+        )
+        res = gen.generate_config_string()
         gen = PyIngestConfigGenerator(
             data_model=data_model, file_directory="./", post_ingest_code=post_ingest
         )
