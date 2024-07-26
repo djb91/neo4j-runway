@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
-from ...resources.prompts.prompts import model_generation_rules
+from ...resources.prompts import create_data_model_errors_cot_prompt
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,
@@ -138,6 +138,7 @@ class DataModel(BaseModel):
         return {r.type: r for r in self.relationships}
 
     def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
+    def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
         """
         Perform additional validation on the data model.
 
@@ -148,6 +149,8 @@ class DataModel(BaseModel):
 
         Returns
         -------
+        Dict[str, Any]
+            A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
         Dict[str, Any]
             A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
         """
@@ -169,8 +172,8 @@ class DataModel(BaseModel):
                 allowed_columns=csv_columns,
             )
 
+            print("validation message: \n", message)
             return {"valid": False, "message": message, "errors": errors}
-
         return {"valid": True, "message": "", "errors": list()}
 
     def _validate_relationship_sources_and_targets(self) -> List[str]:
@@ -179,7 +182,6 @@ class DataModel(BaseModel):
         """
 
         errors = list()
-
         for rel in self.relationships:
             # validate exists
             if rel.source not in self.node_labels:
@@ -210,6 +212,8 @@ class DataModel(BaseModel):
         Validate that each property is used no more than one time in the data model.
         """
 
+        used_features: Dict[str, List[str]] = dict()
+        errors: List[str] = list()
         used_features: Dict[str, List[str]] = dict()
         errors: List[str] = list()
 
@@ -312,10 +316,6 @@ class DataModel(BaseModel):
         """
         Apply Neo4j naming conventions to all labels, relationships and properties in the data model.
         This is typically performed within the __init__ method automatically.
-
-        Returns
-        -------
-        None
         """
 
         # fix node labels and properties
