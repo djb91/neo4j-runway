@@ -26,10 +26,6 @@ class LLMMock:
         )
 
 
-class DiscoveryMock:
-    discovery = "Fake Discovery"
-
-
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
     "id": "unique id for a node.",

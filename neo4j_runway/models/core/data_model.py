@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
-from ...resources.prompts import create_data_model_errors_cot_prompt
+from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,
@@ -182,6 +182,7 @@ class DataModel(BaseModel):
         """
 
         errors = list()
+
         for rel in self.relationships:
             # validate exists
             if rel.source not in self.node_labels:

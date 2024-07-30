@@ -1,5 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
-
+from typing import Any, Dict, List, Union
 from .constants import DATA_MODEL_GENERATION_RULES
 
 
@@ -29,9 +28,7 @@ Rules that must be followed:
 """
 
 
-def create_retry_initial_data_model_prep_generation_prompt(
-    invalid_options: Dict[str, Any], errors: List[str]
-) -> str:
+def create_retry_initial_data_model_prep_generation_prompt(invalid_options: Dict[str, Any], errors: List[str]) -> str:  # type: ignore
     """
     Generate a retry prompt for the brainstorming stage of creating an initial data model.
 
@@ -58,7 +55,7 @@ Initial Data Model Suggestions:
 
 def create_data_model_errors_cot_prompt(
     data_model_as_dictionary: Dict[str, Any],
-    errors: List[Optional[str]],
+    errors: List[str],
     allowed_columns: List[str],
 ) -> str:
     """
@@ -74,7 +71,7 @@ def create_data_model_errors_cot_prompt(
 
     return f"""
 The following data model is invalid and must be fixed.
-Properties must be from the provided Column Options.
+Properties must be from the provided Column Options. 
 Data Model:
 {data_model_as_dictionary}
 Errors:

@@ -1,13 +1,12 @@
 from typing import Optional
-
-from ....inputs import UserInput
 from .constants import DATA_MODEL_GENERATION_RULES, DATA_MODEL_GENERATION_RULES_ADVANCED
+from ....inputs import UserInput
 from .formatters import (
     format_column_descriptions,
     format_discovery_text,
-    format_general_description,
     format_use_cases,
     format_user_corrections,
+    format_general_description,
 )
 
 

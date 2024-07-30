@@ -14,8 +14,8 @@ from IPython.display import (
 )
 
 from ..llm import LLM
-from ..inputs import UserInput
-from ..resources.prompts import create_discovery_prompt
+from ..inputs import UserInput, user_input_safe_construct
+from ..resources.prompts.discovery import create_discovery_prompt
 
 
 class Discovery:
@@ -70,19 +70,8 @@ class Discovery:
 
         # we convert all user_input to a UserInput object
         if not isinstance(user_input, UserInput):
-            general_description = (
-                user_input["general_description"]
-                if "general_description" in user_input
-                else ""
-            )
-            if "general_description" in user_input.keys():
-                del user_input["general_description"]
-            else:
-                warnings.warn(
-                    "user_input should include key:value pair {general_description: ...} for best results. "
-                )
-            self.user_input = UserInput(
-                general_description=general_description, column_descriptions=user_input
+            self.user_input = user_input_safe_construct(
+                unsafe_user_input=user_input, allowed_columns=data.columns
             )
         else:
             self.user_input = user_input
@@ -92,6 +81,7 @@ class Discovery:
         self.columns_of_interest = self.user_input.allowed_columns
         self.columns_of_interest = self.user_input.allowed_columns
 
+        self.data = data[self.columns_of_interest]
         self.data = data[self.columns_of_interest]
 
         self.pandas_only = not self.llm or pandas_only
@@ -145,7 +135,7 @@ class Discovery:
             )
         else:
             response = f"""Here are Summary Statistics generated with the Pandas Python library
-
+            
 {self.df_info}
 
 {self.categorical_data_description}

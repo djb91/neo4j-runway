@@ -1,6 +1,5 @@
-import pandas as pd
-
 from ....inputs import UserInput
+import pandas as pd
 
 
 def create_discovery_prompt(
