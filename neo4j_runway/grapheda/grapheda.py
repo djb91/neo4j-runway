@@ -12,17 +12,28 @@ It also helps identify errors and outliers in the data.
 import os
 from typing import Dict, List, Any, Union
 
-from neo4j import GraphDatabase
+from neo4j_runway.database.neo4j import Neo4jGraph
 
 class GraphEDA:
     """
     The GraphEDA module performs Graph Exploratory data analysis on the created Neo4j graph database.
     """
 
-    # will need to pass in data from constructing the graph 
     def __init__(self, neo4j_graph: Neo4jGraph):
         self.neo4j_graph = neo4j_graph
-        self.result_cache = dict() 
+        self.result_cache = dict()  # cache EDA results for reuse 
+
+
+    # count nodes by label
+    def single_label_nodes(self, driver):
+        session = neo4j_graph.session() # open a session
+        query = """MATCH (n) 
+                    WITH n, labels(n) as node_labels
+                    WHERE size(node_labels) = 1
+                    WITH node_labels[0] as uniqueLabels
+                    RETURN uniqueLabels, count(uniqueLabels) as count
+                    ORDER BY count DESC"""
+
     # explicit errors -- something didn't come over correctly
         
         # priority -- things in a graph created from the csv in this session
@@ -31,9 +42,8 @@ class GraphEDA:
             # optional -- pass the data to an LLM to interpret 
             # future -- have a method that will try to fix the issue  
         
-        # future -- things in graph not created with runway 
+        # future -- things in graph not created with runway
         
-        
-    # graph summary statistics
+    
     # other possible issues
 
