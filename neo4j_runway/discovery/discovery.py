@@ -55,7 +55,7 @@ class Discovery:
         """
         The Discovery module that handles summarization and discovery generation via an LLM.
 
-        Attributes
+        Parameters
         ----------
         llm : LLM, optional
             The LLM instance used to generate data discovery. Only required if pandas_only = False.
@@ -116,10 +116,6 @@ class Discovery:
             Whether to print the generated discovery upon retrieval.
         notebook : bool
             Whether code is executed in a notebook. Affects the result print formatting.
-
-        Returns
-        ----------
-        None
         """
 
         self._generate_csv_summary()
@@ -157,10 +153,6 @@ class Discovery:
         ----------
         notebook : bool, optional
             Whether executing in a notebook, by default True
-
-        Returns
-        ----------
-        None
         """
 
         print(self.discovery) if not notebook else display(Markdown(self.discovery))

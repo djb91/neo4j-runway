@@ -59,7 +59,7 @@ class GraphDataModeler:
         Takes an LLM instance and Discovery information.
         Either a Discovery object can be provided, or each field can be provided individually.
 
-        Attributes
+        Parameters
         ----------
         llm : BaseLLM
             The LLM used to generate data models.
@@ -77,9 +77,7 @@ class GraphDataModeler:
             A categorical data description provided by Pandas, by default None
         feature_descriptions : Dict[str, str], optional
             Feature (column) descriptions provided by Discovery, by default None
-        allowed_columns : List[str], optional
-            The columns that may be used in the data model. The argument should only be used in no columns are specified in
-            the discovery or user_input arguments. By default []
+        columns_of_interest : List[str]
         """
 
         self.llm = llm
