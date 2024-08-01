@@ -1,11 +1,11 @@
-import warnings
 from typing import Any, Dict, List, Optional, Union
+import warnings
 
 from neo4j import GraphDatabase
 
-from ...exceptions import APOCNotInstalledError
-from ...utils.read_env import read_environment
 from ..base import BaseGraph
+from ...utils.read_env import read_environment
+from ...exceptions import APOCNotInstalledError
 
 
 class Neo4jGraph(BaseGraph):
@@ -62,21 +62,14 @@ class Neo4jGraph(BaseGraph):
         )
         self.database = database or read_environment("NEO4J_DATABASE") or "neo4j"
         self.apoc_version = self._get_apoc_version()
-        version, _ = self._get_database_version()
-        self._schema: Optional[Dict[str, Any]] = None
+        version, edition = self._get_database_version()
+        self.database_edition = edition
+        self._schema = None
 
         super().__init__(driver=self.driver, version=version)
 
     @property
-    def schema(self) -> Union[Dict[str, Any], None]:
-        """
-        The database schema provided by apoc.meta.schema
-
-        Returns
-        -------
-        Dict[str, Any]
-            The schema.
-        """
+    def schema(self) -> Dict[str, Any]:
         if self._schema is None:
             self.refresh_schema()
         return self._schema
@@ -96,6 +89,7 @@ class Neo4jGraph(BaseGraph):
         """
 
         try:
+
             self.driver.verify_connectivity()
             self.driver.verify_authentication()
         except Exception as e:
@@ -120,18 +114,20 @@ class Neo4jGraph(BaseGraph):
         """
         try:
             with self.driver.session(database=self.database) as session:
-                response = session.run(
-                    """CALL dbms.components()
+                response = (
+                    session.run(
+                        """CALL dbms.components()
     YIELD versions, edition
     RETURN versions[0] as version, edition"""
-                ).single()
-            if response is not None:
-                self.database_version, self.database_edition = response.values()
-
-        except Exception:
+                    )
+                    .single()
+                    .values()
+                )
+            self.database_version, self.database_edition = response
+        except Exception as e:
             self.driver.close()
 
-        return [self.database_version, self.database_edition]
+        return response
 
     def _get_apoc_version(self) -> Union[str, None]:
         """
@@ -144,12 +140,8 @@ class Neo4jGraph(BaseGraph):
         """
         try:
             with self.driver.session(database=self.database) as session:
-                response = session.run("RETURN apoc.version()").single()
-                if response is not None:
-                    return str(response.value())
-                else:
-                    return None
-        except Exception:
+                return session.run("RETURN apoc.version()").single().value()
+        except Exception as e:
             warnings.warn(
                 "APOC is not found in the database. Some features such as schema retrieval depend on APOC."
             )
@@ -171,7 +163,7 @@ class Neo4jGraph(BaseGraph):
         """
         try:
             with self.driver.session() as session:
-                response: Dict[str, Any] = session.run(
+                response = session.run(
                     """CALL apoc.meta.schema()
 YIELD value
 RETURN value as dataModel"""
@@ -179,7 +171,7 @@ RETURN value as dataModel"""
 
             self.schema = response
             return response
-        except Exception:
+        except Exception as e:
             raise APOCNotInstalledError(
                 "APOC must be installed to perform `refresh_schema` operation."
             )
