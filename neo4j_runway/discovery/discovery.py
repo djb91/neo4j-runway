@@ -13,7 +13,7 @@ from IPython.display import (
     display,
 )
 
-from ..llm import LLM
+from ..llm.base import BaseDiscoveryLLM
 from ..inputs import UserInput, user_input_safe_construct
 from ..resources.prompts.discovery import create_discovery_prompt
 
@@ -49,7 +49,7 @@ class Discovery:
         self,
         data: pd.DataFrame,
         user_input: Union[Dict[str, str], UserInput] = dict(),
-        llm: Optional[LLM] = None,
+        llm: Optional[BaseDiscoveryLLM] = None,
         pandas_only: bool = False,
     ) -> None:
         """

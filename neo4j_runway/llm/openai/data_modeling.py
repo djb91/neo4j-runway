@@ -1,4 +1,3 @@
-# mypy: allow-untyped-defs
 """
 This file contains the LLM module that interfaces with an OpenAI LLM for data modeing via the Instructor library.
 """
@@ -9,7 +8,7 @@ from typing import Any, Optional
 try:
     import openai
 except ImportError:
-    openai = None  # type: ignore[unused-ignore, assignment]
+    openai = None  # type: ignore
 
 import instructor
 

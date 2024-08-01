@@ -12,6 +12,10 @@ from graphviz import Digraph
 from pydantic import BaseModel
 
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
+from ...exceptions import (
+    InvalidArrowsDataModelError,
+    InvalidSolutionsWorkbenchDataModelError,
+)
 from .node import Node
 from .relationship import Relationship
 from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
@@ -172,8 +176,8 @@ class DataModel(BaseModel):
                 allowed_columns=csv_columns,
             )
 
-            print("validation message: \n", message)
             return {"valid": False, "message": message, "errors": errors}
+
         return {"valid": True, "message": "", "errors": list()}
 
     def _validate_relationship_sources_and_targets(self) -> List[str]:
@@ -439,38 +443,44 @@ class DataModel(BaseModel):
         DataModel
             An instance of a DataModel.
         """
-
-        with open(f"{file_path}", "r") as f:
-            content = literal_eval(f.read())
-            node_id_to_label_map = {n["id"]: n["labels"][0] for n in content["nodes"]}
-            return cls(
-                nodes=[
-                    Node.from_arrows(
-                        ArrowsNode(
-                            id=n["id"],
-                            position=n["position"],
-                            labels=n["labels"],
-                            properties=n["properties"],
-                            caption=n["caption"],
-                            style=n["style"],
+        try:
+            with open(f"{file_path}", "r") as f:
+                content = literal_eval(f.read())
+                node_id_to_label_map = {
+                    n["id"]: n["labels"][0] for n in content["nodes"]
+                }
+                return cls(
+                    nodes=[
+                        Node.from_arrows(
+                            ArrowsNode(
+                                id=n["id"],
+                                position=n["position"],
+                                labels=n["labels"],
+                                properties=n["properties"],
+                                caption=n["caption"],
+                                style=n["style"],
+                            )
                         )
-                    )
-                    for n in content["nodes"]
-                ],
-                relationships=[
-                    Relationship.from_arrows(
-                        ArrowsRelationship(
-                            id=r["id"],
-                            fromId=r["fromId"],
-                            toId=r["toId"],
-                            properties=r["properties"],
-                            type=r["type"],
-                            style=r["style"],
-                        ),
-                        node_id_to_label_map=node_id_to_label_map,
-                    )
-                    for r in content["relationships"]
-                ],
+                        for n in content["nodes"]
+                    ],
+                    relationships=[
+                        Relationship.from_arrows(
+                            ArrowsRelationship(
+                                id=r["id"],
+                                fromId=r["fromId"],
+                                toId=r["toId"],
+                                properties=r["properties"],
+                                type=r["type"],
+                                style=r["style"],
+                            ),
+                            node_id_to_label_map=node_id_to_label_map,
+                        )
+                        for r in content["relationships"]
+                    ],
+                )
+        except Exception:
+            raise InvalidArrowsDataModelError(
+                "Unable to parse the provided arrows.app data model json file."
             )
 
     def to_solutions_workbench(
@@ -540,24 +550,28 @@ class DataModel(BaseModel):
             An instance of a DataModel.
         """
 
-        with open(f"{file_path}", "r") as f:
-            content = json.loads(f.read())
-            node_id_to_label_map = {
-                n["key"]: n["label"]
-                for n in content["dataModel"]["nodeLabels"].values()
-            }
-            return cls(
-                nodes=[
-                    Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
-                    # print(n, "\n")
+        try:
+            with open(f"{file_path}", "r") as f:
+                content = json.loads(f.read())
+                node_id_to_label_map = {
+                    n["key"]: n["label"]
                     for n in content["dataModel"]["nodeLabels"].values()
-                ],
-                relationships=[
-                    Relationship.from_solutions_workbench(
-                        SolutionsWorkbenchRelationship(**r),
-                        node_id_to_label_map=node_id_to_label_map,
-                    )
-                    for r in content["dataModel"]["relationshipTypes"].values()
-                ],
-                metadata=content["metadata"],
+                }
+                return cls(
+                    nodes=[
+                        Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
+                        for n in content["dataModel"]["nodeLabels"].values()
+                    ],
+                    relationships=[
+                        Relationship.from_solutions_workbench(
+                            SolutionsWorkbenchRelationship(**r),
+                            node_id_to_label_map=node_id_to_label_map,
+                        )
+                        for r in content["dataModel"]["relationshipTypes"].values()
+                    ],
+                    metadata=content["metadata"],
+                )
+        except Exception:
+            raise InvalidSolutionsWorkbenchDataModelError(
+                "Unable to parse the provided Solutions Workbench data model json file."
             )

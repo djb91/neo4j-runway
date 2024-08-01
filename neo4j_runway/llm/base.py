@@ -9,15 +9,15 @@ from instructor import Instructor
 
 from ..inputs import UserInput
 from ..models import DataModel
-from ..resources.llm_response_types import DataModelEntityPool, ErrorRecommendations
 from ..resources.prompts import (
     SYSTEM_PROMPTS,
 )
 from ..resources.prompts.data_modeling import (
+    create_retry_data_model_generation_prompt,
     create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
-    create_retry_data_model_generation_prompt,
 )
+from ..resources.llm_response_types import DataModelEntityPool, ErrorRecommendations
 
 
 class BaseDiscoveryLLM(ABC):
@@ -28,7 +28,7 @@ class BaseDiscoveryLLM(ABC):
     def __init__(
         self,
         model_name: str,
-        client: Any,
+        client: Instructor,
         model_params: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> None:
@@ -58,20 +58,15 @@ class BaseDiscoveryLLM(ABC):
         Get a discovery response from the LLM.
         """
 
-        response: str = (
-            self.client.chat.completions.create(
-                model=self.model_name,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
-                    {"role": "user", "content": formatted_prompt},
-                ],
-                **self.model_params,
-            )
-            .choices[0]
-            .message.content
+        response = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
+                {"role": "user", "content": formatted_prompt},
+            ],
+            **self.model_params,
         )
-
-        return response
+        return response.choices[0].message.content
 
 
 class BaseDataModelingLLM(ABC):
@@ -147,7 +142,7 @@ class BaseDataModelingLLM(ABC):
                 ],
                 **self.model_params,
             )
-            validation = entity_pool.validate_pool(
+            validation = entity_pool.validate(
                 allowed_features=user_input.allowed_columns
             )
             part_one_retries += 1
@@ -186,6 +181,7 @@ class BaseDataModelingLLM(ABC):
         retries = 0
         valid_response = False
         while retries < max_retries and not valid_response:
+
             retries += 1  # increment retries each pass
 
             response: DataModel = self.client.chat.completions.create(

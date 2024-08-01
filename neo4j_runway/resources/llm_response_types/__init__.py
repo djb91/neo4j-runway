@@ -1,4 +1,2 @@
-from .error_recommendations import ErrorRecommendations
 from .initial_model_pool import DataModelEntityPool
-
-__all__ = ["ErrorRecommendations", "DataModelEntityPool"]
+from .error_recommendations import ErrorRecommendations
