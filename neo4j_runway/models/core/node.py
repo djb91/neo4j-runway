@@ -1,15 +1,24 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from pydantic import BaseModel, field_validator
 
 from ..arrows import ArrowsNode
-from .property import Property
 from ..solutions_workbench import SolutionsWorkbenchNode
+from .property import Property
 
 
 class Node(BaseModel):
     """
     Standard Node representation.
+
+    Attributes
+    -------
+    label : str
+        The node label.
+    properties : List[Property]
+        A list of the properties within the node.
+    csv_name : str, optional
+        The name of the CSV containing the node's information.
     """
 
     label: str
@@ -23,8 +32,8 @@ class Node(BaseModel):
         """
         Standard Node representation.
 
-        Attributes
-        -------
+        Parameters
+        ----------
         label : str
             The node label.
         properties : List[Property]

@@ -1,11 +1,11 @@
-from typing import Any, Dict, List, Optional, Union
 import warnings
+from typing import Any, Dict, List, Optional, Union
 
 from neo4j import GraphDatabase
 
-from ..base import BaseGraph
-from ...utils.read_env import read_environment
 from ...exceptions import APOCNotInstalledError
+from ...utils.read_env import read_environment
+from ..base import BaseGraph
 
 
 class Neo4jGraph(BaseGraph):
@@ -70,6 +70,14 @@ class Neo4jGraph(BaseGraph):
 
     @property
     def schema(self) -> Dict[str, Any]:
+        """
+        The database schema provided by apoc.meta.schema
+
+        Returns
+        -------
+        Dict[str, Any]
+            The schema.
+        """
         if self._schema is None:
             self.refresh_schema()
         return self._schema
@@ -89,7 +97,6 @@ class Neo4jGraph(BaseGraph):
         """
 
         try:
-
             self.driver.verify_connectivity()
             self.driver.verify_authentication()
         except Exception as e:
@@ -124,7 +131,7 @@ class Neo4jGraph(BaseGraph):
                     .values()
                 )
             self.database_version, self.database_edition = response
-        except Exception as e:
+        except Exception:
             self.driver.close()
 
         return response
@@ -141,7 +148,7 @@ class Neo4jGraph(BaseGraph):
         try:
             with self.driver.session(database=self.database) as session:
                 return session.run("RETURN apoc.version()").single().value()
-        except Exception as e:
+        except Exception:
             warnings.warn(
                 "APOC is not found in the database. Some features such as schema retrieval depend on APOC."
             )
@@ -171,7 +178,7 @@ RETURN value as dataModel"""
 
             self.schema = response
             return response
-        except Exception as e:
+        except Exception:
             raise APOCNotInstalledError(
                 "APOC must be installed to perform `refresh_schema` operation."
             )

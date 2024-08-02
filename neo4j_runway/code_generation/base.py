@@ -2,14 +2,14 @@
 This file contains the base conde generator class. All code generation classes must inherit from this class.
 """
 
-from abc import ABC
 import os
-from typing import Dict, Any
+from abc import ABC
+from typing import Any, Dict
 
 import yaml
 
-from .cypher import *
 from ..models import DataModel
+from .cypher import *
 
 
 class folded_unicode(str):
@@ -48,7 +48,7 @@ class BaseCodeGenerator(ABC):
         """
         This is the base class for code generation. All code generation classes must inherit from this class.
 
-        Attributes
+        Parameters
         ----------
         data_model : DataModel
             The data model to base ingestion code on.
