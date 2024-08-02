@@ -7,10 +7,10 @@ test:
 	pytest tests
 
 test_integration:
-	pytest tests/integration
+	poetry run pytest tests/integration
 
 test_unit:
-	pytest tests/unit
+	poetry run pytest tests/unit
 
 init:
 	poetry install --with dev
@@ -22,22 +22,6 @@ init:
 
 format:
 	poetry run ruff format
-	poetry run ruff check --select I . --fix
-
-######################
-# DOCUMENTATION
-######################
-
-docs_preview:
-	BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve --source docs/
-
-docs_refresh:
-	python3 scripts/refresh_class_documentation.py
-	python3 scripts/refresh_function_documentation.py
-	python3 scripts/update_docs_version.py
-
-docs_add_example:
-	 python3 scripts/add_example_to_docs.py --notebook_path=$(file_path)
 
 ######################
 # DOCUMENTATION
@@ -67,4 +51,4 @@ help:
 	@echo 'format...................... - run code formatters'
 	@echo 'test........................ - run all unit and integration tests'
 	@echo 'test_unit................... - run all free unit tests'
-	@echo 'test_integration............ - run all integration tests'	
+	@echo 'test_integration............ - run all integration tests'

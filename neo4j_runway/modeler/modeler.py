@@ -1,4 +1,3 @@
-from typing import Any, Dict, List, Optional, Union
 import warnings
 from typing import Any, Dict, List, Optional, Union
 
@@ -9,7 +8,6 @@ from ..inputs import UserInput, user_input_safe_construct
 from ..llm.base import BaseDataModelingLLM
 from ..models import DataModel
 from ..resources.prompts.data_modeling import (
-    create_initial_data_model_prompt,
     create_data_model_iteration_prompt,
 )
 

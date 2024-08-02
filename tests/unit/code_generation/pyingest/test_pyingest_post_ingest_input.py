@@ -1,9 +1,8 @@
 import unittest
 from typing import List
 
-from neo4j_runway.models import Node, Relationship, Property, DataModel
 from neo4j_runway.code_generation import PyIngestConfigGenerator
-
+from neo4j_runway.models import DataModel, Node, Property, Relationship
 
 nodes = [
     Node(

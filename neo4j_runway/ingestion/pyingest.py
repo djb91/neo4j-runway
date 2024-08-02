@@ -3,15 +3,13 @@ This is a modified PyIngest file for Neo4j Runway. It currently only supports Pa
 """
 
 import datetime
-from typing import Optional
 import warnings
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 import yaml
 from neo4j import GraphDatabase
-
 
 global_config = dict()
 

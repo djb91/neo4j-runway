@@ -1,7 +1,7 @@
 import unittest
 
 from neo4j_runway.code_generation.cypher import *
-from neo4j_runway.models import Node, Relationship, Property, DataModel
+from neo4j_runway.models import DataModel, Node, Property, Relationship
 from tests.resources.answers.ingestion_generation_answers import *
 
 

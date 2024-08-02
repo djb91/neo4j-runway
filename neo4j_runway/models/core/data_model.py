@@ -3,33 +3,26 @@ This file contains the DataModel class which is the standard representation of a
 """
 
 import json
-from ast import literal_eval
 import json
-from typing import Any, List, Dict, Optional, Union
+from ast import literal_eval
+from typing import Any, Dict, List, Optional, Union
 
+import yaml
 import yaml
 from graphviz import Digraph
 from pydantic import BaseModel
 
-from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from ...exceptions import (
     InvalidArrowsDataModelError,
     InvalidSolutionsWorkbenchDataModelError,
 )
-from .node import Node
-from .relationship import Relationship
 from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
-from ..solutions_workbench import (
-    SolutionsWorkbenchDataModel,
-    SolutionsWorkbenchNode,
-    SolutionsWorkbenchRelationship,
-)
 from ...utils.naming_conventions import (
     fix_node_label,
     fix_property,
     fix_relationship_type,
 )
-from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
+from ..arrows.data_model import ArrowsDataModel, ArrowsNode, ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,

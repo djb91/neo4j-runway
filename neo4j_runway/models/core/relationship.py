@@ -1,12 +1,12 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from pydantic import BaseModel, field_validator
 
-from .property import Property
 from ..arrows import ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchRelationship,
 )
+from .property import Property
 
 
 class Relationship(BaseModel):

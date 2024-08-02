@@ -6,41 +6,15 @@
 
 ### Changed
 
-### Added
-
-## 0.9.1
-
-### Fixed
-
-* Fix bug in LoadCSVCodeGenerator
-
-### Changed
-
-### Added
-
-* Unit tests for LoadCSVCodeGenerator and StandardCypherCodeGenerator classes
-
-## 0.9.0
-
-### Fixed
-
-* pre-commit hooks now work properly and utilize ruff and mypy instead of black
-
-### Changed
-
 * Refactor LLM class into base class with DiscoveryLLM and DataModelingLLM child classes for each LLM integration
+
+* pre-commit hooks now work properly and utilize ruff instead of black
 
 * Restructure and refactor tests directory to mirror the neo4j_runway package structure
 
 * Implement pytest to handle testing
 
 ### Added
-
-* Implement GitHub actions to automate unit and integration testing on PR
-
-* Implement GitHub actions to automate ruff and mypy checks on PR
-
-* Implement strict style guides utilizing ruff and mypy
 
 * Add Neo4jGraph module to handle database connections. This will be used in a future EDA module.
 
@@ -54,6 +28,6 @@
 
 * Implement chain-of-thought reasoning for initial data model generation. This improves responses by:
 
-  * Multi-hop traversals generated more reliably when appropriate
+* * Multi-hop traversals generated more reliably when appropriate
 
-  * Constraints generated more reliably
+* * Constriants generated more reliably
