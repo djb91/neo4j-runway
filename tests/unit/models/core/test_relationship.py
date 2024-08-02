@@ -4,6 +4,7 @@ from neo4j_runway.models import Relationship, Property, ArrowsRelationship
 
 
 class TestRelationship(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.prop1 = Property(
@@ -16,6 +17,7 @@ class TestRelationship(unittest.TestCase):
         cls.target = "NodeB"
 
     def test_init(self) -> None:
+
         relationship = Relationship(
             type="HAS_SIMILAR",
             properties=[self.prop1, self.prop2],
@@ -27,6 +29,7 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(len(relationship.properties), 2)
 
     def test_properties(self) -> None:
+
         relationship = Relationship(
             type="HAS_SIMILAR",
             properties=[self.prop1, self.prop2],
@@ -37,6 +40,7 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(relationship.property_names, ["score", "current"])
 
     def test_unique_properties(self) -> None:
+
         relationship = Relationship(
             type="HAS_SIMILAR",
             properties=[self.prop1, self.prop2],
@@ -47,6 +51,7 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(relationship.unique_properties, [self.prop2])
 
     def test_property_column_mapping(self) -> None:
+
         relationship = Relationship(
             type="HAS_SIMILAR",
             properties=[self.prop1, self.prop2],
@@ -60,6 +65,7 @@ class TestRelationship(unittest.TestCase):
         )
 
     def test_unique_properties_column_mapping(self) -> None:
+
         relationship = Relationship(
             type="HAS_SIMILAR",
             properties=[self.prop1, self.prop2],
@@ -112,6 +118,7 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")
 
     def test_validate_relationship_keys(self) -> None:
+
         rel = Relationship(
             type="relA",
             properties=[

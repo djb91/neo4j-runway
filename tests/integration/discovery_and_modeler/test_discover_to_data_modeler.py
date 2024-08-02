@@ -1,5 +1,5 @@
-import os
 import unittest
+import warnings
 
 from dotenv import load_dotenv
 import pandas as pd
@@ -11,7 +11,7 @@ from neo4j_runway.llm.openai import OpenAIDiscoveryLLM, OpenAIDataModelingLLM
 load_dotenv()
 
 
-class TestLLMGeneration(unittest.TestCase):
+class TestDiscoveryToDataModeler(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -43,28 +43,37 @@ class TestLLMGeneration(unittest.TestCase):
         self.assertIsInstance(disc.discovery, str)
 
         # test data modeler
-        gdm = GraphDataModeler(
-            llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"), discovery=disc
-        )
-        gdm.create_initial_model()
+        with warnings.catch_warnings():  # Instructor throws DepprecationWarning only during testing... Needs fix on Instructor side
+            warnings.simplefilter(action="ignore", category=DeprecationWarning)
+            gdm = GraphDataModeler(
+                llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"),
+                discovery=disc,
+            )
+            gdm.create_initial_model()
 
+        self.assertEqual(len(gdm.model_history), 1)
         self.assertIsInstance(gdm.current_model, DataModel)
 
     def test_sequence_with_pets_data(self) -> None:
 
         # test discovery generation
         data = pd.read_csv("tests/resources/data/shelters.csv")
-        disc = Discovery(data=data, llm=OpenAIDiscoveryLLM())
+
+        with self.assertWarns(UserWarning):
+            disc = Discovery(data=data, llm=OpenAIDiscoveryLLM())
 
         disc.run(show_result=False)
 
         self.assertIsInstance(disc.discovery, str)
+        with warnings.catch_warnings():  # Instructor throws DepprecationWarning only during testing... Needs fix on Instructor side
+            warnings.simplefilter(action="ignore", category=DeprecationWarning)
+            # test data modeler
+            gdm = GraphDataModeler(
+                llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"),
+                discovery=disc,
+            )
 
-        # test data modeler
-        gdm = GraphDataModeler(
-            llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"), discovery=disc
-        )
-        print(gdm.create_initial_model())
+            gdm.create_initial_model()
 
         self.assertEqual(len(gdm.model_history), 1)
         self.assertIsInstance(gdm.current_model, DataModel)

@@ -1,11 +1,14 @@
 import unittest
 
-from neo4j_runway.models.core.property import Property, TYPES_MAP_PYTHON_KEYS
+from neo4j_runway.models.core.property import Property
+from neo4j_runway.resources.mappings import TYPES_MAP_PYTHON_TO_NEO4J
 
 
 class TestProperty(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
+
         pass
 
     def test_init(self) -> None:
@@ -23,6 +26,7 @@ class TestProperty(unittest.TestCase):
         )
 
     def test_init_with_neo4j_type(self) -> None:
+
         p = Property(
             name="street", type="STRING", csv_mapping="street", is_unique=False
         )

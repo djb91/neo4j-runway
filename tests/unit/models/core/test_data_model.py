@@ -2,10 +2,11 @@ import unittest
 
 from neo4j_runway.models import Node, Relationship, Property, DataModel
 
-from ..resources.answers.data_model_yaml import data_model_dict, data_model_yaml
+from tests.resources.answers.data_model_yaml import data_model_dict, data_model_yaml
 
 
 class TestDataModel(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.columns = [

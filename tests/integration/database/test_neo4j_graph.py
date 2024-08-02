@@ -5,6 +5,7 @@ from neo4j_runway.database import Neo4jGraph
 
 
 class TestNeo4jGraph(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.creds = {
@@ -20,23 +21,22 @@ class TestNeo4jGraph(unittest.TestCase):
 
     def test_init_without_creds(self) -> None:
         g = Neo4jGraph()
-        self.assertEqual("neo4j", g.database)
+        self.assertEqual("peoplepets", g.database)
 
         g.driver.close()
 
     def test_database_version_and_edition(self) -> None:
         g = Neo4jGraph(**self.creds)
 
-        self.assertTrue(g.database_version.startswith("5"))
+        self.assertEqual("5.15.0", g.database_version)
         self.assertEqual("enterprise", g.database_edition)
-        print(g.database_version, g.database_edition)
 
         g.driver.close()
 
     def test_apoc_version(self) -> None:
         g = Neo4jGraph(**self.creds)
 
-        self.assertTrue(g.apoc_version.startswith("5"))
+        self.assertEqual("5.15.1", g.apoc_version)
 
         g.driver.close()
 

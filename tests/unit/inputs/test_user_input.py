@@ -18,6 +18,7 @@ data = {
 
 
 class TestUserInput(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         pass
@@ -100,7 +101,7 @@ class TestUserInput(unittest.TestCase):
         allowed_columns = ["col_a", "col_b"]
 
         with self.assertRaises(ValueError):
-            user_input_safe_construct(
+            safe_input = user_input_safe_construct(
                 unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
             )
 

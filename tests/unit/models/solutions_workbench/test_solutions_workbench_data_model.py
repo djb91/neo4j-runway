@@ -3,14 +3,15 @@ import os
 import unittest
 
 from neo4j_runway.models import (
-    DataModel,
     Node,
-    Property,
     Relationship,
+    Property,
+    DataModel,
 )
 
 
 class TestSolutionsWorkbenchDataModel(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.columns = [
@@ -145,7 +146,7 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         self.assertEqual(len(dm.relationships), 6)
         self.assertIsNotNone(dm.metadata)
 
-        dm.to_solutions_workbench(
+        sw_dm = dm.to_solutions_workbench(
             file_path="converted-data-model-sw-test.json", write_file=False
         )
 
@@ -166,7 +167,7 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
 
         try:
             os.remove(f"./{file_path}")
-        except Exception:
+        except Exception as e:
             print("No Solutions Workbench data model created.")
 
 

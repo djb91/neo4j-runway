@@ -1,5 +1,6 @@
 import os
 import unittest
+
 from ast import literal_eval
 
 from neo4j_runway.models import (
@@ -7,14 +8,12 @@ from neo4j_runway.models import (
     Relationship,
     Property,
     DataModel,
-    Node,
-    Property,
-    Relationship,
+    ArrowsDataModel,
 )
-from neo4j_runway.models.arrows import ArrowsDataModel
 
 
 class TestDataModel(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.columns = [
@@ -103,7 +102,7 @@ class TestDataModel(unittest.TestCase):
         """
         Test init.
         """
-        self.data_model.to_arrows(write_file=False)
+        dm_to_adm = self.data_model.to_arrows(write_file=False)
 
     def test_json_generation(self) -> None:
         """
@@ -111,17 +110,17 @@ class TestDataModel(unittest.TestCase):
         """
 
         file_path = "test-arrows-output.json"
-        self.data_model.to_arrows(file_path=file_path, write_file=True)
+        dm_to_adm = self.data_model.to_arrows(file_path=file_path, write_file=True)
 
         with open(f"./{file_path}", "r") as f:
             content = literal_eval(f.read())
-            ArrowsDataModel(
+            adm_copy = ArrowsDataModel(
                 nodes=content["nodes"], relationships=content["relationships"]
             )
 
         try:
             os.remove(f"./{file_path}")
-        except Exception:
+        except Exception as e:
             print("No arrows data model created.")
 
 

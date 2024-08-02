@@ -1,8 +1,9 @@
 import os
 import unittest
 
+from neo4j_runway.models import Node, Relationship, Property, DataModel
 from neo4j_runway.code_generation import StandardCypherCodeGenerator
-from neo4j_runway.models import DataModel, Node, Property, Relationship
+
 
 nodes = [
     Node(
@@ -36,8 +37,10 @@ data_model = DataModel(nodes=nodes, relationships=[rel])
 
 
 class TestStandardCypherCodeGeneration(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls) -> None:
+
         cls.gen = StandardCypherCodeGenerator(data_model=data_model)
 
     def test_cypher_string_generation(self) -> None:
@@ -78,8 +81,8 @@ class TestStandardCypherCodeGeneration(unittest.TestCase):
             self.assertIn("REL_AC", res)
 
         try:
-            os.remove("./test.cypher")
-        except Exception:
+            os.remove(f"./test.cypher")
+        except Exception as e:
             print("No cypher file data model created.")
 
     def test_write_constraints_file(self) -> None:
@@ -102,8 +105,8 @@ class TestStandardCypherCodeGeneration(unittest.TestCase):
             )
 
         try:
-            os.remove("./test.cypher")
-        except Exception:
+            os.remove(f"./test.cypher")
+        except Exception as e:
             print("No constraints file data model created.")
 
 
