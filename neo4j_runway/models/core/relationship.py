@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -260,10 +260,13 @@ class Relationship(BaseModel):
         Initialize a core Relationship from a Solutions Workbench Relationship.
         """
 
-        props = [
-            Property.from_solutions_workbench(solutions_workbench_property=prop)
-            for prop in solutions_workbench_relationship.properties.values()
-        ]
+        props = list()
+
+        if solutions_workbench_relationship.properties is not None:
+            props = [
+                Property.from_solutions_workbench(solutions_workbench_property=prop)
+                for prop in solutions_workbench_relationship.properties.values()
+            ]
 
         # support only single labels for now, take first label
         return cls(

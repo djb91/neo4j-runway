@@ -4,14 +4,14 @@ This is a modified PyIngest file for Neo4j Runway. It currently only supports Pa
 
 import datetime
 import warnings
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
 import yaml
 from neo4j import GraphDatabase
 
-global_config = dict()
+global_config: Dict[str, Any] = dict()
 
 
 class LocalServer(object):
@@ -110,7 +110,7 @@ class LocalServer(object):
 
         print("{} : Completed file", datetime.datetime.now())
 
-    def pre_ingest(self):
+    def pre_ingest(self) -> None:
         if "pre_ingest" in global_config:
             statements = global_config["pre_ingest"]
             if len(statements) > 0:
@@ -120,7 +120,7 @@ class LocalServer(object):
             else:
                 print("no pre ingest scripts found.")
 
-    def post_ingest(self):
+    def post_ingest(self) -> None:
         if "post_ingest" in global_config:
             statements = global_config["post_ingest"]
             if len(statements) > 0:
@@ -131,13 +131,13 @@ class LocalServer(object):
                 print("no post ingest scripts found.")
 
 
-def load_config(configuration):
+def load_config(configuration: Any) -> None:
     global global_config
     global_config = yaml.safe_load(configuration)
 
 
 def PyIngest(
-    config: str = None, dataframe: Optional[pd.DataFrame] = None, **kwargs
+    config: str, dataframe: Optional[pd.DataFrame] = None, **kwargs: Any
 ) -> None:
     """
     Function to ingest data according to a configuration YAML.

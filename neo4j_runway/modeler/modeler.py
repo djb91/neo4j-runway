@@ -116,7 +116,7 @@ class GraphDataModeler:
             self.general_info = general_data_description or ""
             self.description_numeric = numeric_data_description or ""
             self.description_categorical = categorical_data_description or ""
-            self.feature_descriptions = feature_descriptions or ""
+            self.feature_descriptions = feature_descriptions or dict()
 
         if self.discovery == "":
             warnings.warn(

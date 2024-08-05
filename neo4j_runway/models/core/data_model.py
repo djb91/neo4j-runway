@@ -5,7 +5,7 @@ This file contains the DataModel class which is the standard representation of a
 import json
 import json
 from ast import literal_eval
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import yaml
 import yaml
@@ -22,7 +22,7 @@ from ...utils.naming_conventions import (
     fix_property,
     fix_relationship_type,
 )
-from ..arrows.data_model import ArrowsDataModel, ArrowsNode, ArrowsRelationship
+from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,
@@ -330,7 +330,7 @@ class DataModel(BaseModel):
             for prop in rel.properties:
                 prop.name = fix_property(prop.name)
 
-    def to_json(self, file_path: str = "data-model.json") -> Dict[str, any]:
+    def to_json(self, file_path: str = "data-model.json") -> Dict[str, Any]:
         """
         Output the data model to a json file.
 
@@ -369,7 +369,7 @@ class DataModel(BaseModel):
             A String representation of the yaml file.
         """
 
-        yaml_string = yaml.dump(self.model_dump(exclude=["metadata"]))
+        yaml_string = yaml.dump(self.model_dump(exclude={"metadata"}))
 
         if write_file:
             with open(f"{file_path}", "w") as f:
