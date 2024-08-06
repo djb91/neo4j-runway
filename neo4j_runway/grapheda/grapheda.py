@@ -7,33 +7,31 @@ of the data in graph form (nodes, relationships, and properties).
 It also helps identify errors and outliers in the data. 
 """
 
-# import pandas as pd
-
+import pandas as pd
 import os
 from typing import Dict, List, Any, Union
-
 from neo4j_runway.database.neo4j import Neo4jGraph
-
 class GraphEDA:
     """
     The GraphEDA module performs Graph Exploratory data analysis on the created Neo4j graph database.
     """
-
     def __init__(self, neo4j_graph: Neo4jGraph):
         self.neo4j_graph = neo4j_graph
-        self.result_cache = dict()  # cache EDA results for reuse 
-
-
+        self.result_cache = dict()  # cache results in raw format 
+    
     # count nodes by label
-    def single_label_nodes(self, driver):
-        session = neo4j_graph.session() # open a session
+    def count_node_labels(self, neo4j_graph, return_as_dataframe: bool = False):
+        
         query = """MATCH (n) 
-                    WITH n, labels(n) as node_labels
-                    WHERE size(node_labels) = 1
-                    WITH node_labels[0] as uniqueLabels
-                    RETURN uniqueLabels, count(uniqueLabels) as count
-                    ORDER BY count DESC"""
-
+                   WITH n, labels(n) as node_labels
+                   WITH node_labels[0] as uniqueLabels
+                   RETURN uniqueLabels, count(uniqueLabels) as count
+                   ORDER BY count DESC"""
+        
+        with neo4j_graph.driver.session() as session:
+            response = session.execute_query(query) # open a session
+            print(response)
+        
     # explicit errors -- something didn't come over correctly
         
         # priority -- things in a graph created from the csv in this session
@@ -46,4 +44,3 @@ class GraphEDA:
         
     
     # other possible issues
-
