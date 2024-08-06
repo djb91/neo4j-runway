@@ -1,1 +1,1 @@
-from .graphEDA import GraphEDA
+from .grapheda import GraphEDA
