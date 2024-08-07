@@ -11,16 +11,6 @@ from neo4j_runway.utils.test_connection import test_database_connection
 import dotenv 
 dotenv.load_dotenv()
 
-# print("Connecting to:", read_environment("NEO4J_URI"))
-
-# credentials = {"username": read_environment("NEO4J_USERNAME"),
-#                 "password": read_environment("NEO4J_PASSWORD"),
-#                 "uri": read_environment("NEO4J_URI")
-#                 }
-
-# response = test_database_connection(credentials=credentials)
-# print(response)
-
 from neo4j_runway.grapheda.grapheda import GraphEDA
 
 
@@ -35,16 +25,20 @@ neo4j_graph = Neo4jGraph(
 # instantiate GraphEDA class
 graph_eda = GraphEDA(neo4j_graph=neo4j_graph)
 
-#get node count by label 
-# result = graph_eda.count_node_labels()
+# result = graph_eda.node_label_counts()
+# print(type(result))
+# print(result)
+# print(graph_eda.result_cache["node_label_counts"])
+
+# result = graph_eda.relationship_type_counts()
+# print(type(result))
 # print(result)
 
-result = graph_eda.count_node_labels(as_df=True)
-# print(type(result))
-# print(pd.DataFrame(result))
-print([record.data() for record in result])
+# graph_eda.multi_label_nodes()
+# print(type(graph_eda.result_cache["multi_label_nodes"]))
+# print(graph_eda.result_cache["multi_label_nodes"])
 
-# result = graph_eda.count_disconnected_nodes(as_df=False)
+# result = graph_eda.count_disconnected_nodes()
 # print(type(result))
 # # print(result)
 # print("disconnected node count:", result[0]['nodeCount'])
