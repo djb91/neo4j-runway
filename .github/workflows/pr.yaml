@@ -1,5 +1,5 @@
-# Modified from Neo4j GenAI Python Library pr.yaml file
-name: Runway PR
+
+name: runway PR
 on: pull_request
 
 jobs:
