@@ -43,3 +43,7 @@ graph_eda = GraphEDA(neo4j_graph=neo4j_graph)
 # # print(result)
 # print("disconnected node count:", result[0]['nodeCount'])
 
+graph_eda.node_properties()
+print(type(graph_eda.result_cache["node_properties"]))
+print(graph_eda.result_cache["node_properties"][0])
+
