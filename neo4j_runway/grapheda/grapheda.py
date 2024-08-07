@@ -96,6 +96,34 @@ class GraphEDA:
         except Exception:
             self.neo4j_graph.driver.close()
 
+    # get properties for each node label type
+    def node_properties(self) -> List[Dict[str, Any]]:
+        """
+        Get the properties for each unique node label in the graph.
+        Parameters:
+            None
+        Returns:
+            list: A list of dictionaries, where each dictionary contains the unique node label 
+            in the database as "label" along with the list of properties for that label as "properties".
+        """
+
+        query = """CALL db.schema.nodeTypeProperties()"""
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+
+                # remove the "nodeType" key from each dictionary
+                response_list = [{k: v for k, v in record.items() if k != "nodeType"} for record in response_list]
+
+                self.result_cache["node_properties"] = response_list
+                return response_list
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
+
+
     # count relationships by type
     def relationship_type_counts(self) -> List[Dict[str, Any]]:
         """
