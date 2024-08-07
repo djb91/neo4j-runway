@@ -1,11 +1,11 @@
 # script to test Neo4jGraph Class
 
+import pandas as pd
+
 # import neo4jrunway functions 
 from neo4j_runway.database import Neo4jGraph
 from neo4j_runway.utils.read_env import read_environment
 from neo4j_runway.utils.test_connection import test_database_connection
-
-
 
 # import and read from .env file
 import dotenv 
@@ -39,9 +39,13 @@ graph_eda = GraphEDA(neo4j_graph=neo4j_graph)
 # result = graph_eda.count_node_labels()
 # print(result)
 
-# result = graph_eda.count_node_labels(as_df=False)
-# print(result)
+result = graph_eda.count_node_labels(as_df=True)
+# print(type(result))
+# print(pd.DataFrame(result))
+print([record.data() for record in result])
 
-result = graph_eda.count_disconnected_nodes(as_df=False)
-print("disconnected node count:", result[0]['nodeCount'])
+# result = graph_eda.count_disconnected_nodes(as_df=False)
+# print(type(result))
+# # print(result)
+# print("disconnected node count:", result[0]['nodeCount'])
 

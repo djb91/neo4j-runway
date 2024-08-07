@@ -23,19 +23,35 @@ class GraphEDA:
         self.result_cache = dict()  # cache results in raw format 
         logging.getLogger("neo4j").setLevel(logging.CRITICAL)
     
+    ############################
     # DATA EXPLORATION FUNCTIONS
+    ############################
     # count nodes by label
     def count_node_labels(self, as_df: bool = False):
+        """
+        Count the number of nodes for each unique label in the graph.
+        Parameters:
+            as_df (bool): If True, return the result as a pandas DataFrame. 
+                          If False, return the result as a list of dictionaries.
+        Returns:
+            If as_df is True:
+                pandas.DataFrame: A DataFrame containing the unique labels and their counts.
+            If as_df is False:
+                list: A list of dictionaries, where each dictionary contains the unique label and its count.
+        """
+
         query = """MATCH (n) 
                    WITH n, labels(n) as node_labels
                    WITH node_labels[0] as uniqueLabels
                    RETURN uniqueLabels, count(uniqueLabels) as count
                    ORDER BY count DESC"""
-        if as_df == True:
+        
+        if as_df == True: # NOTE: Return as dataframe not working yet
             try:
                 with self.neo4j_graph.driver.session() as session:
-                    response = session.run(query, 
-                                           result_transformer_= neo4j.Result.to_df)
+                    response = session.run(query=query, 
+                                           driver_config={'result_transformer': 'neo4j.Result.to_df'})
+                if response is not None:
                     return response
             except Exception:
                 self.neo4j_graph.driver.close()
@@ -50,17 +66,32 @@ class GraphEDA:
                 self.neo4j_graph.driver.close()
 
 
+    ############################
     # DATA QUALITY FUNCTIONS
+    ############################
+
+    # count disconnected nodes
     def count_disconnected_nodes(self, as_df: bool = False):
+        """
+        Count the number of disconnected nodes in the graph.
+        Parameters:
+        - as_df (bool): If True, return the result as a dataframe. Default is False.
+        Returns:
+        - If as_df is True, returns the result as a dataframe.
+        - If as_df is False, returns a list of dictionaries, 
+            where each dictionary represents a record in the response.
+        """
+
         query = """MATCH (n) 
                    WHERE NOT (n)--()
                    RETURN COUNT(n) as nodeCount"""
         
-        if as_df == True:
+        if as_df == True: # NOTE: Return as dataframe not working yet
             try:
                 with self.neo4j_graph.driver.session() as session:
-                    response = session.run(query, 
-                                           result_transformer_= neo4j.Result.to_df)
+                    response = session.run(query=query, 
+                                           driver_config={'result_transformer': 'neo4j.Result.to_df'})
+                if response is not None:
                     return response
             except Exception:
                 self.neo4j_graph.driver.close()
@@ -68,11 +99,14 @@ class GraphEDA:
         else:
             try:
                 with self.neo4j_graph.driver.session() as session:
-                    response = session.run(query)
+                    response = session.run(query=query)
                     return [record.data() for record in response]
                 
             except Exception:
                 self.neo4j_graph.driver.close()
+
+
+
 
 
     # explicit errors -- something didn't come over correctly
