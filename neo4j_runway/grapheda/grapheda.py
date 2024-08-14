@@ -44,6 +44,18 @@ class GraphEDA:
     # DATABASE DETAILS 
     ############################
 
+    # return database version 
+    def database_version(self) -> str:
+        """
+        Prints the version of the Neo4j database.
+        Parameters:
+            None
+        Returns:
+            None
+        """
+
+        print("Neo4j Database Version:", self.neo4j_graph.database_version)
+
     # get database indexes 
     def database_indexes(self) -> List[Dict[str, Any]]:
         """
@@ -91,7 +103,7 @@ class GraphEDA:
             self.neo4j_graph.driver.close()
 
     ############################
-    # DATA EXPLORATION FUNCTIONS
+    # NODE DETAILS
     ############################
 
     # graph node count
@@ -199,6 +211,31 @@ class GraphEDA:
         except Exception:
             self.neo4j_graph.driver.close()
 
+    ############################
+    # RELATIONSHIP DETAILS
+    ############################
+
+    def relationship_count(self) -> int:
+        """
+        Count the number of relationships in the graph.
+        Parameters:
+            None
+        Returns:
+            int: The number of relationships in the graph. Also  
+            appends the result to the result_cache dictionary.
+        """
+
+        query = """MATCH ()-[r]->() RETURN COUNT(r) AS relCount"""
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+                self.result_cache["relationship_count"] = response_list[0]["relCount"]
+                return response_list[0]["relationship_count"]
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
 
     # count relationships by type
     def relationship_type_counts(self) -> List[Dict[str, Any]]:
@@ -254,7 +291,6 @@ class GraphEDA:
             self.neo4j_graph.driver.close()
     
 
-    
     ############################
     # DATA QUALITY FUNCTIONS
     ############################

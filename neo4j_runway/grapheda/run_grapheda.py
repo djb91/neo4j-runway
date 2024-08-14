@@ -29,71 +29,100 @@ graph_eda = GraphEDA(neo4j_graph=neo4j_graph)
 # DATABASE DETAILS 
 ############################
 
-# result = graph_eda.neo4j_graph.database_version
-# print(result)
+print("\n########## DATABASE DETAILS ##########")
 
-# result = graph_eda.neo4j_graph.schema
-# print(type(result))
-# print(len(result))
-# print(result.keys())
-# print(result['Customer'])
+graph_eda.database_version()
 
+result = graph_eda.database_indexes()
 
+print("\nNode Indexes:")
+ctr = 0
+for item in result:
+    if item['entityType'] == 'NODE' and item['labelsOrTypes'] is not None:
+        ctr += 1
+        print(item['labelsOrTypes'], ":", item['properties'])
+print("Node Indexes Count:", ctr)
 
-# result = graph_eda.database_indexes()
-# print(type(result))
-# print(graph_eda.result_cache["database_indexes"])
+print("\nRelationship Indexes:")
+ctr = 0
+for item in result:
+    if item['entityType'] == 'RELATIONSHIP' and item['labelsOrTypes'] is not None:
+        ctr += 1
+        print(item['labelsOrTypes'], ":", item['properties'])
+if ctr > 0:
+    print("Relationship Indexe Count:", ctr)
+else:
+    print("No relationship indexes in database.")
 
-# result = graph_eda.database_constraints()
-# print(type(result))
-# print(graph_eda.result_cache["database_constraints"])
-
+print("\nDatabase Constraints:")
+_ = graph_eda.database_constraints()
+if len(graph_eda.result_cache["database_constraints"]) == 0:
+    print("No constraints in database.")
+else:
+    print(pd.DataFrame(graph_eda.result_cache["database_constraints"])
+          .loc[:, ['name', 'type', 'entityType', 'labelsOrTypes', 'properties']]
+          .to_string(index=False)
+          )
 
 
 ############################
 # DATA EXPLORATION FUNCTIONS
 ############################
 
-result = graph_eda.neo4j_graph.schema
-for key, value in result.items():
-    if value["type"] == "node":
-        print(key, value['count'])
+print("\n########## NODE DETAILS ##########")
 
-# result = graph_eda.node_count()
-# print(type(result))
-# print(result)
-# print("node count:", graph_eda.result_cache["node_count"])
+_ = graph_eda.node_count()
+print("\nTotal nodes in database:", graph_eda.result_cache["node_count"])
 
-result = graph_eda.node_label_counts()
-# print(type(result))
-# print(result)
-# print(graph_eda.result_cache["node_label_counts"])
-print('Database Node Label Counts:')
+_ = graph_eda.node_label_counts()
+print("\nNode counts by label:")
 for item in graph_eda.result_cache["node_label_counts"]:
     print(item['label'], ":", item['count'])
 
+print('\nMulti-Label Nodes:')
+_ = graph_eda.multi_label_nodes()
+if len(_) == 0:
+    print("No multi-label nodes in graph")
+else:
+    print(graph_eda.result_cache["multi_label_nodes"])
+
+print('\nNode Properties:')
+_ = graph_eda.node_properties()
+print(pd.DataFrame(graph_eda.result_cache["node_properties"])
+      .sort_values(by='nodeLabels', ascending=True)
+      .to_string(index=False))
+
+print("\n########## RELATIONSHIP DETAILS ##########")
+
+_ = graph_eda.relationship_count()
+print("\nTotal relationships in database:", graph_eda.result_cache["relationship_count"])
+
+print("\nRelationship counts by type:")
+_ = graph_eda.relationship_type_counts()
+for item in graph_eda.result_cache["relationship_type_counts"]:
+    print(item['label'], ":", item['count'])
+
+print("\nRelationship Properties:")
+_ =  graph_eda.relationship_properties()
+print(pd.DataFrame(graph_eda.result_cache["relationship_properties"])
+      .dropna(subset=['propertyName'])
+      .to_string(index=False))
+
+############################
+# DATA QUALITY FUNCTIONS
+############################
 
 
-# result = graph_eda.relationship_type_counts()
-# print(type(result))
-# print(result)
+print("\n########## DATA QUALITY ##########")
 
-# graph_eda.multi_label_nodes()
-# print(type(graph_eda.result_cache["multi_label_nodes"]))
-# print(graph_eda.result_cache["multi_label_nodes"])
+_ = graph_eda.count_disconnected_nodes()
+print('\nCount of disconnected nodes by label:')
+for item in graph_eda.result_cache["disconnected_nodes"]:
+    print(item['nodeLabel'], ":", item['count'])
 
-# graph_eda.node_properties()
-# print(type(graph_eda.result_cache["node_properties"]))
-# print(graph_eda.result_cache["node_properties"][0])
-
-# graph_eda.relationship_properties()
-# print(type(graph_eda.result_cache["relationship_properties"]))
-# print(graph_eda.result_cache["relationship_properties"][0])
-
-# result = graph_eda.count_disconnected_nodes()
-# print(type(result))
-# print(graph_eda.result_cache["disconnected_nodes"])
-
-# result = graph_eda.disconnected_node_ids()
-# print(type(result))
-# print(graph_eda.result_cache["disconnected_node_ids"])
+_ = graph_eda.disconnected_node_ids()
+print('\nDisconnected node ids:')
+print(pd.DataFrame(graph_eda.result_cache["disconnected_node_ids"])
+      .to_string(index=False))
+# for item in graph_eda.result_cache["disconnected_node_ids"]:
+#     print(item['nodeLabel'], ":", item['node_id'])
