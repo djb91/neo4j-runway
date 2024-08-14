@@ -295,6 +295,14 @@ class GraphEDA:
     # DATA QUALITY FUNCTIONS
     ############################
 
+    # count unlabeled nodes
+    def count_unlabeled_nodes(self) -> List[Dict[str, Any]]:
+        pass 
+
+    # identify unlabeled nodes
+    def unlabeled_node_ids(self) -> List[Dict[str, Any]]:
+        pass
+
     # count disconnected nodes
     def count_disconnected_nodes(self) -> List[Dict[str, Any]]:
         """
@@ -352,13 +360,42 @@ class GraphEDA:
         except Exception:
             self.neo4j_graph.driver.close()
 
-    # count unlabeled nodes
-    def count_unlabeled_nodes(self) -> List[Dict[str, Any]]:
-        pass 
 
-    # identify unlabeled nodes
-    def unlabeled_node_ids(self) -> List[Dict[str, Any]]:
-        pass
+    ############################
+    # GRAPH STATISTICS FUNCTIONS
+    ############################
+
+    # node degree
+    def node_degree(self) -> List[Dict[str, Any]]:
+        """
+        Calculate the in-degree and out-degree of each node in the graph.
+        Parameters:
+            None
+        Returns:
+            list: A list of dictionaries, where each dictionary contains the node id as "node_id",
+            label as the node label, the in-degree of the node as "inDegree", and the out-degree of
+            the node as "outDegree".
+        """
+        query = """MATCH (n)
+                    OPTIONAL MATCH (n)-[r_out]->()
+                    WITH n, id(n) AS nodeId, labels(n) AS nodeLabel, count(r_out) AS outDegree
+                    OPTIONAL MATCH (n)<-[r_in]-()
+                    RETURN nodeId, nodeLabel, count(r_in) AS inDegree, outDegree
+                    ORDER BY outDegree DESC;
+                    """
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+                self.result_cache["node_degrees"] = response_list
+                return response_list
+        
+        except Exception:
+            self.neo4j_graph.driver.close()
+
+
+
 
     # explicit errors -- something didn't come over correctly
         
