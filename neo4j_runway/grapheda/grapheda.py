@@ -5,6 +5,10 @@ on the LLM-created Neo4j graph database.
 The purpose of GraphEDA is to understand the characteristics 
 of the data in graph form (nodes, relationships, and properties). 
 It also helps identify errors and outliers in the data. 
+
+The functions in the GraphEDA module use Cypher queries to analyze 
+all data in the graph. apoc.meta.schema uses sampling techniques and
+so the results are not deterministic. 
 """
 
 import pandas as pd
@@ -36,11 +40,83 @@ class GraphEDA:
         self.result_cache = dict()  # cache results in raw format 
         logging.getLogger("neo4j").setLevel(logging.CRITICAL)
     
+    ############################
+    # DATABASE DETAILS 
+    ############################
+
+    # get database indexes 
+    def database_indexes(self) -> List[Dict[str, Any]]:
+        """
+        Get the indexes for the graph database.
+        Parameters:
+            None
+        Returns:
+            list: A list of dictionaries, where each dictionary contains the index name as "name" and
+            the list of labels for that index as "labels".
+        """
+
+        query = """SHOW INDEXES"""
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+                self.result_cache["database_indexes"] = response_list
+                return response_list
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
+
+    # get database constraints
+    def database_constraints(self) -> List[Dict[str, Any]]:
+        """
+        Get the constraints for the graph database.
+        Parameters:
+            None
+        Returns:
+            list: A list of dictionaries, where each dictionary contains the constraint name as "name" and
+            the list of labels for that constraint as "labels".
+        """
+
+        query = """SHOW CONSTRAINTS"""
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+                self.result_cache["database_constraints"] = response_list
+                return response_list
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
 
     ############################
     # DATA EXPLORATION FUNCTIONS
     ############################
 
+    # graph node count
+    def node_count(self) -> int:
+        """
+        Count the number of nodes in the graph.
+        Parameters:
+            None
+        Returns:
+            int: The number of nodes in the graph. Also appends 
+            the result to the result_cache dictionary.
+        """
+
+        query = """MATCH (n) RETURN COUNT(n) AS nodeCount"""
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+                self.result_cache["node_count"] = response_list[0]["nodeCount"]
+                return response_list[0]["nodeCount"]
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
+    
     # count nodes by label
     def node_label_counts(self) -> List[Dict[str, Any]]:
         """
@@ -150,6 +226,35 @@ class GraphEDA:
         except Exception:
             self.neo4j_graph.driver.close()
 
+    # get properties for each relationship type
+    def relationship_properties(self) -> List[Dict[str, Any]]:
+        """
+        Get the properties for each unique relationship type in the graph.
+        Parameters:
+            None
+        Returns:
+            list: A list of dictionaries, where each dictionary contains the unique relationship property 
+            name, property data type, and whether or not the relationship property is required by the schema.
+        """
+
+        query = """CALL db.schema.relTypeProperties()"""
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+
+                # remove the "relationshipType" key from each dictionary
+                response_list = [{k: v for k, v in record.items() if k != "relType"} for record in response_list]
+
+                self.result_cache["relationship_properties"] = response_list
+                return response_list
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
+    
+
+    
     ############################
     # DATA QUALITY FUNCTIONS
     ############################
@@ -163,14 +268,15 @@ class GraphEDA:
         Returns:
         - the results as a list of dictionaries, where each dictionary 
         includes a node label and the count of disconnected nodes for that label
+        - ex: [{'nodeLabel': 'Customer', 'count': 2}]
         - also appends the results to the result_cache dictionary
         """
 
         query = """MATCH (n) 
                    WHERE NOT (n)--()
                    WITH n, labels(n) as node_labels
-                   WITH node_labels[0] as uniqueLabels
-                   RETURN uniqueLabels, count(uniqueLabels) as count
+                   WITH node_labels[0] as nodeLabel
+                   RETURN nodeLabel, count(nodeLabel) as count
                    ORDER BY count DESC"""
         
         try:
@@ -185,13 +291,38 @@ class GraphEDA:
 
 
     # identify disconnected nodes
-    def id_disconnected_nodes(self) -> List[Dict[str, Any]]:
-        pass
+    def disconnected_node_ids(self) -> List[Dict[str, Any]]:
+        """
+        Identify the node ids of disconnected nodes in the graph.
+        Parameters:
+            None
+        Returns:
+            list: A list of dictionaries, where each dictionary contains the node label as "nodeLabel" and
+            the node id as "node_id" for each disconnected node in the graph.
+            ex: [{'nodeLabel': 'Customer', 'node_id': 135}, {'nodeLabel': 'Customer', 'node_id': 170}]
+        """
+         
+        query = """MATCH (n) 
+                   WHERE NOT (n)--()
+                   RETURN labels(n)[0] as nodeLabel, ID(n) as node_id"""
+            
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+                self.result_cache["disconnected_node_ids"] = response_list
+                return response_list
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
 
     # count unlabeled nodes
-    def count_unlabeled_nodes(self, as_df: bool = False): 
+    def count_unlabeled_nodes(self) -> List[Dict[str, Any]]:
         pass 
 
+    # identify unlabeled nodes
+    def unlabeled_node_ids(self) -> List[Dict[str, Any]]:
+        pass
 
     # explicit errors -- something didn't come over correctly
         
