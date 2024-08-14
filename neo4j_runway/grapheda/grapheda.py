@@ -296,8 +296,28 @@ class GraphEDA:
     ############################
 
     # count unlabeled nodes
-    def count_unlabeled_nodes(self) -> List[Dict[str, Any]]:
-        pass 
+    def unlabeled_node_count(self) -> int:
+        """
+        Count the number of nodes in the graph that are not labeled.
+        Parameters:
+            None
+        Returns:
+            list: The count of unlabeled nodes in the graph
+        """ 
+
+        query = """MATCH (n)
+                    WHERE labels(n) = []
+                    RETURN COUNT(n) AS unlabeled_ct"""
+        
+        try:
+            with self.neo4j_graph.driver.session() as session:
+                response = session.run(query)
+                response_list = [record.data() for record in response]
+                self.result_cache["unlabeled_node_count"] = response_list[0]["unlabeled_ct"]
+                return response_list[0]["unlabeled_node_count"]
+            
+        except Exception:
+            self.neo4j_graph.driver.close()
 
     # identify unlabeled nodes
     def unlabeled_node_ids(self) -> List[Dict[str, Any]]:

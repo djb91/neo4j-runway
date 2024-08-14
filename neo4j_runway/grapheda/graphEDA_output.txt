@@ -1,0 +1,167 @@
+###########################################
+# Neo4j Exploratory Data Analysis Report
+###########################################
+
+########## DATABASE DETAILS ##########
+Neo4j Database Version: 5.21.2
+
+Node Indexes:
+['Customer'] : ['contactName']
+['Customer'] : ['customerID']
+['Product'] : ['productID']
+['Supplier'] : ['supplierID']
+['Order'] : ['orderID']
+['Product'] : ['productName']
+['Category'] : ['categoryID']
+Node Indexes Count: 7
+
+Relationship Indexes:
+No relationship indexes in database.
+
+Database Constraints:
+     name       type entityType labelsOrTypes    properties
+cust_name UNIQUENESS       NODE    [Customer] [contactName]
+
+########## NODE DETAILS ##########
+
+Total nodes in database: 1035
+
+Node counts by label:
+Order : 830
+Customer : 91
+Product : 77
+Supplier : 29
+Category : 8
+
+Multi-Label Nodes:
+No multi-label nodes in graph
+
+Node Properties:
+nodeLabels    propertyName propertyTypes  mandatory
+[Category]      categoryID      [String]       True
+[Category]    categoryName      [String]       True
+[Category]     description      [String]       True
+[Category]         picture      [String]       True
+[Customer]         address      [String]       True
+[Customer]          region      [String]       True
+[Customer]     companyName      [String]       True
+[Customer]             fax      [String]       True
+[Customer]     contactName      [String]       True
+[Customer]      postalCode      [String]       True
+[Customer]         country      [String]       True
+[Customer]           phone      [String]       True
+[Customer]    contactTitle      [String]       True
+[Customer]            city      [String]       True
+[Customer]      customerID      [String]       True
+   [Order]      shipRegion      [String]       True
+   [Order]       orderDate      [String]       True
+   [Order]        shipName      [String]       True
+   [Order]      customerID      [String]       True
+   [Order]         orderID      [String]       True
+   [Order]      employeeID      [String]       True
+   [Order]        shipCity      [String]       True
+   [Order]         shipVia      [String]       True
+   [Order]     shipAddress      [String]       True
+   [Order]    requiredDate      [String]       True
+   [Order]  shipPostalCode      [String]       True
+   [Order]     shippedDate      [String]       True
+   [Order]     shipCountry      [String]       True
+   [Order]         freight      [String]       True
+ [Product]    unitsOnOrder        [Long]       True
+ [Product] quantityPerUnit      [String]       True
+ [Product]    reorderLevel        [Long]       True
+ [Product]      supplierID      [String]       True
+ [Product]      categoryID      [String]       True
+ [Product]    discontinued     [Boolean]       True
+ [Product]     productName      [String]       True
+ [Product]    unitsInStock        [Long]       True
+ [Product]       unitPrice      [Double]       True
+ [Product]       productID      [String]       True
+[Supplier]      supplierID      [String]       True
+[Supplier]            city      [String]       True
+[Supplier]    contactTitle      [String]       True
+[Supplier]           phone      [String]       True
+[Supplier]        homePage      [String]       True
+[Supplier]         country      [String]       True
+[Supplier]      postalCode      [String]       True
+[Supplier]     contactName      [String]       True
+[Supplier]             fax      [String]       True
+[Supplier]     companyName      [String]       True
+[Supplier]          region      [String]       True
+[Supplier]         address      [String]       True
+
+########## RELATIONSHIP DETAILS ##########
+
+Total relationships in database: 3139
+
+Relationship counts by type:
+ORDERS : 2155
+PURCHASED : 830
+PART_OF : 77
+SUPPLIES : 77
+
+Relationship Properties:
+propertyName propertyTypes  mandatory
+   productID      [String]       True
+   unitPrice      [String]       True
+    quantity        [Long]       True
+     orderID      [String]       True
+    discount      [String]       True
+
+########## DATA QUALITY ##########
+
+All nodes in database have labels.
+
+Count of disconnected nodes by label:
+Customer : 2
+
+Disconnected node ids:
+nodeLabel  node_id
+ Customer      135
+ Customer      170
+
+########## GRAPH STATISTICS ##########
+
+Distribution of Node Out-Degrees:
+count    1035.00
+mean        3.03
+std         2.88
+min         0.00
+25%         2.00
+50%         2.00
+75%         3.00
+90%         5.00
+95%         7.00
+99%        15.00
+max        31.00
+Name: outDegree, dtype: float64
+
+Nodes with Highest Out-Degrees:
+ nodeId  nodeLabel  inDegree  outDegree
+    184 [Customer]         0         31
+    133 [Customer]         0         30
+    176 [Customer]         0         28
+   1034    [Order]         1         25
+    137 [Customer]         0         19
+
+Distribution of Node In-Degrees:
+count    1035.00
+mean        3.03
+std         8.20
+min         0.00
+25%         1.00
+50%         1.00
+75%         1.00
+90%         1.00
+95%        21.30
+99%        42.66
+max        55.00
+Name: inDegree, dtype: float64
+
+Nodes with Highest In-Degrees:
+ nodeId nodeLabel  inDegree  outDegree
+     58 [Product]        55          1
+     23 [Product]        52          1
+     30 [Product]        52          1
+     59 [Product]        52          1
+     55 [Product]        51          1
