@@ -1,43 +1,63 @@
-# script to test Neo4jGraph Class
+# class to run GraphEDA functions 
 
 import pandas as pd
-
-# import neo4jrunway functions 
+import dotenv 
 from neo4j_runway.database import Neo4jGraph
 from neo4j_runway.utils.read_env import read_environment
 from neo4j_runway.utils.test_connection import test_database_connection
-
-# import and read from .env file
-import dotenv 
-dotenv.load_dotenv()
-
 from neo4j_runway.grapheda.grapheda import GraphEDA
 
 
-# instantiate Neo4jGraph
-neo4j_graph = Neo4jGraph(
-        username=read_environment("NEO4J_USERNAME"),
-        password=read_environment("NEO4J_PASSWORD"),
-        uri=read_environment("NEO4J_URI"),
-    )
+class RunGraphEDA:
+    def __init__(self):
+        # import and read from .env file
+        dotenv.load_dotenv()
+
+        # instantiate Neo4jGraph
+        self.neo4j_graph = Neo4jGraph(
+                username=read_environment("NEO4J_USERNAME"),
+                password=read_environment("NEO4J_PASSWORD"),
+                uri=read_environment("NEO4J_URI"),
+            )
+
+        # instantiate GraphEDA class
+        self.graph_eda = GraphEDA(neo4j_graph=self.neo4j_graph)
+
+    def return_constraints(self) -> pd.DataFrame:
+        """
+        Calls GraphEDA.database_constraints().
+        Formats the returned constrains into a pandas DataFrame for use.
+        Parameters:
+            None
+        Returns:
+            pd.DataFrame: DataFrame of database constraints or prints to the console 
+        """
+
+        # call database_constraints() method to get the constrains 
+        db_constraints = self.graph_eda.database_constraints()
+
+        # determine return accessing results from the cache
+        if len(self.graph_eda.result_cache["database_constraints"]) == 0:
+            print("No constraints in database.")
+        else:
+            print(pd.DataFrame(graph_eda.result_cache["database_constraints"])
+                .loc[:, ['name', 'type', 'entityType', 'labelsOrTypes', 'properties']]
+                .to_string(index=False)
+                )
 
 
-# instantiate GraphEDA class
-graph_eda = GraphEDA(neo4j_graph=neo4j_graph)
 
-print("##########################################")
-print("# Neo4j Exploratory Data Analysis Report")
-print("##########################################")
+    def run_database_eda(self, graph_eda):
+        print("##########################################")
+        print("# Neo4j Exploratory Data Analysis Report")
+        print("##########################################")
 
-############################
-# DATABASE DETAILS 
-############################
 
-print("\n########## DATABASE DETAILS ##########")
+        print("\n########## DATABASE DETAILS ##########")
 
-graph_eda.database_version()
+        graph_eda.database_version()
 
-result = graph_eda.database_indexes()
+        result = graph_eda.database_indexes()
 
 print("\nNode Indexes:")
 ctr = 0
@@ -58,15 +78,7 @@ if ctr > 0:
 else:
     print("No relationship indexes in database.")
 
-print("\nDatabase Constraints:")
-_ = graph_eda.database_constraints()
-if len(graph_eda.result_cache["database_constraints"]) == 0:
-    print("No constraints in database.")
-else:
-    print(pd.DataFrame(graph_eda.result_cache["database_constraints"])
-          .loc[:, ['name', 'type', 'entityType', 'labelsOrTypes', 'properties']]
-          .to_string(index=False)
-          )
+
 
 
 ############################

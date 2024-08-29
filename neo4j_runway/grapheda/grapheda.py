@@ -7,8 +7,12 @@ of the data in graph form (nodes, relationships, and properties).
 It also helps identify errors and outliers in the data. 
 
 The functions in the GraphEDA module use Cypher queries to analyze 
-all data in the graph. apoc.meta.schema uses sampling techniques and
-so the results are not deterministic. 
+all data in the graph. This is ecause apoc.meta.schema uses sampling techniques 
+and so the results are not necessarily deterministic. 
+
+WARNING: The functions in this module can be computationally expensive.
+They are currently not optimized to use parallel runtime or Graph Data 
+Science algorithms. 
 """
 
 import pandas as pd
@@ -37,8 +41,8 @@ class GraphEDA:
 
         """
         self.neo4j_graph = neo4j_graph
-        self.result_cache = dict()  # cache results in raw format 
-        logging.getLogger("neo4j").setLevel(logging.CRITICAL)
+        self.result_cache = dict()  # dictionariy to cache EDA function results
+        logging.getLogger("neo4j").setLevel(logging.CRITICAL) # surpress some neo4j logging
     
     ############################
     # DATABASE DETAILS 
@@ -413,8 +417,6 @@ class GraphEDA:
         
         except Exception:
             self.neo4j_graph.driver.close()
-
-
 
 
     # explicit errors -- something didn't come over correctly
