@@ -12,7 +12,7 @@ and so the results are not necessarily deterministic.
 
 WARNING: The functions in this module can be computationally expensive.
 They are currently not optimized to use parallel runtime or Graph Data 
-Science algorithms. 
+Science algorithms.  
 """
 
 import pandas as pd
