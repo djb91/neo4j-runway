@@ -18,7 +18,10 @@ Science algorithms.
 import pandas as pd
 import os
 from typing import Dict, List, Any, Union
-from neo4j_runway.database.neo4j import Neo4jGraph
+
+
+from ..neo4j_graph import Neo4jGraph
+
 import logging
 import neo4j 
 

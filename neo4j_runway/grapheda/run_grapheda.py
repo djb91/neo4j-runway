@@ -3,10 +3,17 @@
 from typing import Union
 import pandas as pd
 import dotenv 
-from neo4j_runway.database import Neo4jGraph
-from neo4j_runway.utils.read_env import read_environment
-from neo4j_runway.utils.test_connection import test_database_connection
-from neo4j_runway.grapheda.grapheda import GraphEDA
+
+from ..neo4j_graph import Neo4jGraph
+from .grapheda import GraphEDA
+from ..utils.read_env import read_environment
+# from neo4j_runway.database.neo4j.neo4j_graph import Neo4jGraph
+# from neo4j_runway.grapheda.grapheda import GraphEDA
+# from neo4j_runway.utils.read_env import read_environment
+
+
+# from neo4j_runway.utils.test_connection import test_database_connection
+
 
 
 class RunGraphEDA:
@@ -38,26 +45,26 @@ class RunGraphEDA:
         print("Neo4j Database Version:", self.neo4j_graph.database_version)
 
 
-    def return_constraints(self) -> Union[str, pd.DataFrame]:
-        """
-        Calls GraphEDA.database_constraints().
-        Formats the returned constrains into a pandas DataFrame for consumption and use.
-        Parameters:
-            None
-        Returns:
-            Prints output as either a string or pandas DataFrame
-        """
+    # def return_constraints(self) -> Union[str, pd.DataFrame]:
+    #     """
+    #     Calls GraphEDA.database_constraints().
+    #     Formats the returned constrains into a pandas DataFrame for consumption and use.
+    #     Parameters:
+    #         None
+    #     Returns:
+    #         Prints output as either a string or pandas DataFrame
+    #     """
 
-        # call database_constraints() method to get the constrains 
-        db_constraints = self.graph_eda.database_constraints()
+    #     # call database_constraints() method to get the constrains 
+    #     db_constraints = self.graph_eda.database_constraints()
 
-        # print output as string or pandas DataFrame
-        if len(db_constraints) == 0:
-            print("No constraints in database.")
-        else:
-            print(pd.DataFrame(db_constraints)
-                .loc[:, ['name', 'type', 'entityType', 'labelsOrTypes', 'properties']]
-                .to_string(index=False))
+    #     # print output as string or pandas DataFrame
+    #     if len(db_constraints) == 0:
+    #         print("No constraints in database.")
+    #     else:
+    #         print(pd.DataFrame(db_constraints)
+    #             .loc[:, ['name', 'type', 'entityType', 'labelsOrTypes', 'properties']]
+    #             .to_string(index=False))
 
 
 
@@ -69,9 +76,9 @@ class RunGraphEDA:
 
         print("\n########## DATABASE DETAILS ##########")
 
-        graph_eda.database_version()
+        graph_eda.print_database_version()
 
-        result = graph_eda.database_indexes()
+        # result = graph_eda.database_indexes()
 
 
 if __name__ == "__main__":
