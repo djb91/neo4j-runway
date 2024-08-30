@@ -48,18 +48,6 @@ class GraphEDA:
     # DATABASE DETAILS 
     ############################
 
-    # return database version 
-    def database_version(self) -> str:
-        """
-        Prints the version of the Neo4j database.
-        Parameters:
-            None
-        Returns:
-            None
-        """
-
-        print("Neo4j Database Version:", self.neo4j_graph.database_version)
-
     # get database indexes 
     def database_indexes(self) -> List[Dict[str, Any]]:
         """
